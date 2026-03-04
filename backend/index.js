@@ -3,6 +3,8 @@ const express = require('express');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorMiddleware');
 const authRoutes = require('./routes/authRoutes');
+const AllDataRoutes = require('./routes/AllDataRoutes');
+const SendAlertsRoutes = require('./routes/AlertRoutes');
 const cors = require("cors");
 
 
@@ -13,6 +15,8 @@ app.use(express.json());
 connectDB();
 
 app.use('/auth', authRoutes);
+app.use('/auth', AllDataRoutes);
+app.use('/auth', SendAlertsRoutes);
 
 app.use(errorHandler);
 

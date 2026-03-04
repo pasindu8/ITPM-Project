@@ -16,6 +16,7 @@ function Logout() {
     if (result.isConfirmed) {
       localStorage.removeItem("token");
       localStorage.removeItem("userId");
+      localStorage.clear();
       navigate("/login", { replace: true });
       window.location.reload();
     } else {
