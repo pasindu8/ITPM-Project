@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
 import bgImage from '../assets/6903344.jpg';
 import Sidebar from '../components/Sidebar.js';
+import TimeAgo from 'timeago-react';
 
 
 function CoachDashboard() {
@@ -101,13 +102,24 @@ function CoachDashboard() {
                     </div>
 
                     {/* Success Alert */}
-                    <div className="flex justify-between items-center p-5 bg-white/5 border-l-4 border-white rounded-2xl hover:bg-white/10 transition-all">
-                    <div>
-                        <strong className="text-white text-lg">📢 Message Sent</strong>
-                        <p className="text-sm text-white/60 mt-1">"Today's practice moved to the indoor net due to rain."</p>
-                    </div>
-                    <span className="text-xs text-white/40 font-medium">2 hours ago</span>
-                    </div>
+                    {dashboardData?.alerts?.length > 0 ? (
+                        dashboardData.alerts.map((alert, index) => (
+                        <div key={index} className="flex justify-between items-center p-5 bg-white/5 border-l-4 border-white rounded-2xl hover:bg-white/10 transition-all">
+                        <div>
+                            <strong className="text-white text-lg">📢 Message Sent</strong>
+                            <p className="text-sm text-white/60 mt-1">"{alert.message}"</p>
+                        </div>
+                        <span className="text-xs text-white/40 font-medium">
+                            <TimeAgo 
+                                datetime={alert.dateAndTime} 
+                                locale='en_US' 
+                            />
+                        </span>
+                        </div>
+                        ))
+                    ) : (
+                        <p className="text-white/40">No alerts available</p>
+                    )}
                 </div>
                 
                 </div>

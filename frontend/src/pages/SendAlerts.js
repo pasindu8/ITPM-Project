@@ -13,11 +13,49 @@ function SendAlerts() {
     const [students, setStudents] = useState([]); // ශිෂ්‍යයන් තබා ගැනීමට
     const [selectedAudience, setSelectedAudience] = useState("all"); // තෝරාගත් ශිෂ්‍යයා
 
+    async function handleSubmit(event) {
+        event.preventDefault();
+
+        const data ={
+            player: event.target.player.value,
+            message: event.target.message.value
+        };
+
+        const res = await fetch('http://localhost:5000/auth/send-alerts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${localStorage.getItem("token")}`
+            },
+            body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+            Swal.fire({
+                icon: "error",
+                title: "Failed to Send Alert",
+                text: result.message,
+                confirmButtonText: "OK",
+            });
+            return;
+        } else {
+            Swal.fire({
+                icon: "success",
+                title: "Alert Sent",
+                text: result.message,
+                confirmButtonText: "OK",
+            }); 
+            event.target.reset();
+        }
+    }
+
     useEffect(() => {
         const fetchStats = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch('http://localhost:5000/auth/send-alerts', {
+                const res = await fetch('http://localhost:5000/auth/get-list-students', {
                     headers: { 
                         'Content-Type': 'application/json',
                         'Authorization': `${token}`
@@ -73,19 +111,19 @@ function SendAlerts() {
                     <p className="text-white/60 text-sm mt-1">Send important updates to your players instantly.</p>
                     </div>
 
-                    <form className="space-y-6">
+                    <form className="space-y-6" onSubmit={handleSubmit}>
                     
                     {/* Select Audience */}
                     <div>
                         <label className="block text-white/80 font-medium mb-2 ml-1">Select Audience:</label>
                         <select className="w-full p-4 bg-white/90 border-none rounded-2xl text-gray-800 font-medium focus:ring-4 focus:ring-blue-400/50 outline-none transition-all cursor-pointer appearance-none shadow-inner"
                         value={selectedAudience}
-                        onChange={(e) => setSelectedAudience(e.target.value)}>
+                        onChange={(e) => setSelectedAudience(e.target.value)} name="player">
                         
                             <option value="all">All Players</option>
                             {students.map((student) => (
                                 <option key={student.id} value={student.id}>
-                                    {student.stuid}
+                                    {student.name} ({student.studentId})
                                 </option>
                             ))}
                         </select>
@@ -95,6 +133,7 @@ function SendAlerts() {
                     <div>
                         <label className="block text-white/80 font-medium mb-2 ml-1">Message:</label>
                         <textarea 
+                        name="message"
                         placeholder="Type your urgent message here... (e.g. Practice cancelled due to rain)" 
                         className="w-full h-48 p-5 bg-white/90 border-none rounded-2xl text-gray-800 text-lg focus:ring-4 focus:ring-blue-400/50 outline-none transition-all resize-none shadow-inner leading-relaxed"
                         ></textarea>

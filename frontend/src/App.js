@@ -15,7 +15,6 @@ import ForgotPassword from "./pages/forgotpassword.js";
 import Logout from "./pages/logout.js";
 import Profile from "./pages/Profile.js";
 import Dashboard from "./pages/Dashboard.js";
-import TimetableUpload from "./pages/TimetableUpload.js";
 import CoachDashboard from "./pages/CoachDashboard.js";
 import ScheduleAndConflicts from "./pages/ScheduleAndConflicts.js";
 import QrAttendance from "./pages/QrAttendance.js";
@@ -23,10 +22,13 @@ import PlayerManagement from "./pages/PlayerManagement.js";
 import SendAlerts from "./pages/SendAlerts.js";
 import PerformanceAnalytics from "./pages/PerformanceAnalytics.js";
 import TrainingDrillLibrary from "./pages/TrainingDrillLibrary.js";
-import ChatCenter from "./pages/ChatCenter.js";
 import MatchHistory from "./pages/MatchHistory.js";
 import EquipmentInventory from "./pages/EquipmentInventory.js";
 import NextregisterSTU from "./pages/nextRegisterSTU.js";
+import AddSessionModal from "./pages/AddSessionModal.js";
+import LineupOptimizer from "./pages/LineupOptimizer.js";
+import MatchScouter from "./pages/MatchScouter.js";
+import MatchSummary from "./pages/MatchSummary.js";
  
 import { useEffect, useState } from "react";
 
@@ -78,18 +80,21 @@ function App() {
             <Route path="/adminregister" element={<AdminRegister />} />
             <Route path="/Profile" element={<Profile />} />
             <Route path="/Dashboard" element={<Dashboard />} />
-            <Route path="/TimetableUpload" element={<TimetableUpload />} />
             <Route path="/CoachDashboard" element={<CoachDashboard />} />
             <Route path="/ScheduleAndConflicts" element={<ScheduleAndConflicts />} />
             <Route path="/QrAttendance" element={<QrAttendance />} />
+            <Route path="/QrAttendance/:sessionId" element={<QrAttendance />} />
             <Route path="/PlayerManagement" element={<PlayerManagement />} />
             <Route path="/SendAlerts" element={<SendAlerts />} />
             <Route path="/PerformanceAnalytics" element={<PerformanceAnalytics />} />
             <Route path="/TrainingDrillLibrary" element={<TrainingDrillLibrary />} />
-            <Route path="/ChatCenter" element={<ChatCenter />} />
             <Route path="/MatchHistory" element={<MatchHistory />} />
             <Route path="/EquipmentInventory" element={<EquipmentInventory />} />
             <Route path="/nextRegisterSTU" element={<NextregisterSTU />} />
+            <Route path="/AddSessionModal" element={<AddSessionModal />} />
+            <Route path="/LineupOptimizer" element={<LineupOptimizer />} />
+            <Route path="/MatchScouter" element={<MatchScouter />} />
+            <Route path="/MatchSummary/:sessionId" element={<MatchSummary />} />
           </Routes>
           <Footer />
         </div>

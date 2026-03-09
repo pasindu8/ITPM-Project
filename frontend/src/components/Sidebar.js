@@ -1,7 +1,7 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, Navigate } from 'react-router-dom';
 
 function Sidebar() {
-  
+
   // Active ද නැද්ද යන්න මත Class එක වෙනස් කරන Function එක
   const navItemClass = ({ isActive }) => {
     return `flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-all ${
@@ -46,10 +46,6 @@ function Sidebar() {
 
         <NavLink to="/TrainingDrillLibrary" className={navItemClass}>
           <span>🎯</span> Training Drill Library
-        </NavLink>
-
-        <NavLink to="/ChatCenter" className={navItemClass}>
-          <span>💬</span> Chat Center
         </NavLink>
 
         <NavLink to="/EquipmentInventory" className={navItemClass}>

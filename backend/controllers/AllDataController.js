@@ -9,6 +9,7 @@ const Student = require('../models/Student');
 const Match = require('../models/Match');
 const Equipment = require('../models/Equipment'); 
 const Coach = require('../models/Coach');
+const Alert = require('../models/Alert');
 
 
 const getDashboardData = asyncHandler(async (req, res) => {
@@ -19,11 +20,11 @@ const getDashboardData = asyncHandler(async (req, res) => {
 
     const coachSport = coach ? coach.sport : null;
 
-
-    const [studentCount, recentMatches, equipmentCount] = await Promise.all([
+    const [studentCount, recentMatches, equipmentCount, alertDash] = await Promise.all([
         Student.countDocuments(coachSport ? { sport: coachSport } : {}), // If coachSport is defined, filter by sport, otherwise count all students
         Match.find(coachSport ? { sport: coachSport } : {}).sort({ date: -1 }).limit(5),// If coachSport is defined, filter by sport, otherwise get all matches
-        Equipment.countDocuments(coachSport ? { sport: coachSport } : {}) // If coachSport is defined, filter by sport, otherwise count all equipment
+        Equipment.countDocuments(coachSport ? { sport: coachSport } : {}), // If coachSport is defined, filter by sport, otherwise count all equipment
+        Alert.find({}).sort({ dateAndTime: -1 }).limit(5)
     ]);
 
 
@@ -34,7 +35,8 @@ const getDashboardData = asyncHandler(async (req, res) => {
             matches: recentMatches,
             equipment: equipmentCount,
             name: user.name, // ලොග් වෙලා ඉන්න යූසර්ගේ නම
-            id: user._id
+            id: user._id,
+            alerts: alertDash
         }
     });
 });

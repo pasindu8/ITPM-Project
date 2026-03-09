@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-const getListStudent = require('../controllers/SendAlertsController');
+const {getListStudent, sendAlert} = require('../controllers/SendAlertsController');
 
 const protect = require('../middleware/authMiddleware');
 
-router.get('/send-alerts', protect, getListStudent);
+router.get('/get-list-students', protect, getListStudent);
+router.post('/send-alerts', protect, sendAlert);
 
 module.exports = router;

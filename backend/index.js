@@ -5,6 +5,12 @@ const errorHandler = require('./middleware/errorMiddleware');
 const authRoutes = require('./routes/authRoutes');
 const AllDataRoutes = require('./routes/AllDataRoutes');
 const SendAlertsRoutes = require('./routes/AlertRoutes');
+const scheduleTrainRoutes = require('./routes/scheduleTrainRoutes');
+const attendanceRoutes = require('./routes/attendanceRoutes');
+const scoutRoutes = require('./routes/scoutRoutes');
+const InventoryRoutes = require('./routes/InventoryRoutes');
+const trainingDrillRoutes = require('./routes/trainingDrillRoutes');
+const matchResultRoutes = require('./routes/matchResultRoutes');
 const cors = require("cors");
 
 
@@ -17,7 +23,12 @@ connectDB();
 app.use('/auth', authRoutes);
 app.use('/auth', AllDataRoutes);
 app.use('/auth', SendAlertsRoutes);
-
+app.use('/schedule', scheduleTrainRoutes);
+app.use('/attendance', attendanceRoutes);
+app.use('/scout', scoutRoutes);
+app.use('/inventory', InventoryRoutes);
+app.use('/drills', trainingDrillRoutes);
+app.use('/matchresult', matchResultRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
