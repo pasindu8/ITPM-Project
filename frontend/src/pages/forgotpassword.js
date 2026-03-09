@@ -1,5 +1,6 @@
 import hide from '../assets/hide.png';
 import show from '../assets/show.png';
+import bgImage from '../assets/6903344.jpg';
 import { useNavigate} from 'react-router-dom';
 import React, { useState } from 'react';
 import Swal from "sweetalert2";
@@ -17,7 +18,7 @@ function ForgotPassword() {
           password: event.target.password.value,
           conpassword: event.target.conpassword.value
         };
-        const res = await fetch('https://swiftfilelink-e.vercel.app/auth/forgot-password', {
+        const res = await fetch('http://localhost:5000/auth/forgot-password', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(data),
@@ -48,24 +49,82 @@ function ForgotPassword() {
     }
 
   return (
-    <div>
-      <center>
-         <div class="co">
-            <h1>Reset Password</h1><br/><br/>
-            <form onSubmit={handleSubmit}>
-                <input type="text" className="input" placeholder="Username/Email" name="uname"/><br/><br/>
-                <div className="password">
-                    <input type={isPassVisible ? "text" : "password"} className="input" placeholder="Password" id="password" name="password"/><br/>
-                    <img src={isPassVisible ? show : hide} onClick={() => setPassVisible(!isPassVisible)} style={{ cursor: "pointer" }} className="pass-icon" id="pass-icon" alt="Toggle password visibility"/>
-                </div>
-                <div className="password">
-                    <input type={isConPassVisible ? "text" : "password"} className="input" placeholder="Confirm Password" id="conpassword" name="conpassword"/><br/>
-                    <img src={isConPassVisible ? show : hide} onClick={() => setConPassVisible(!isConPassVisible)} style={{ cursor: "pointer" }} className="pass-icon" id="conpass-icon" alt="Toggle confirm password visibility"/>
-                </div>
-                <button type="submit">Change Password</button><br/>       
-            </form>
+    <div 
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat p-4" 
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
+     
+      <div className="w-full max-w-md p-10 rounded-[40px] bg-white/10 backdrop-blur-2xl backdrop-brightness-110 border-[1.5px] border-white/30 shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-white">
+        
+        
+        <div className="text-center mb-10">
+            <h1 className="text-3xl font-bold mb-2 tracking-wide">Reset Password</h1>
+            <p className="text-sm text-white/70">Enter your email and new password</p>
         </div>
-      </center>
+
+        <form onSubmit={handleSubmit} className="flex flex-col space-y-8">
+            
+           
+            <div className="border-b-2 border-white/40 pb-2">
+                <input 
+                  type="text" 
+                  className="w-full bg-transparent outline-none placeholder-white/80 text-lg px-2" 
+                  placeholder="Username / Email" 
+                  name="uname"
+                  required
+                />
+            </div>
+
+            
+            <div className="border-b-2 border-white/40 pb-2 flex items-center justify-between">
+                <input 
+                  type={isPassVisible ? "text" : "password"} 
+                  className="w-full bg-transparent outline-none placeholder-white/80 text-lg px-2" 
+                  placeholder="New Password" 
+                  name="password"
+                  id="password"
+                  required
+                />
+                
+                <span 
+                  onClick={() => setPassVisible(!isPassVisible)}
+                  className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity p-1"
+                  title={isPassVisible ? "Hide Password" : "Show Password"}
+                >
+                  {isPassVisible ? "🙈" : "👁️"} 
+                </span>
+            </div>
+
+           
+            <div className="border-b-2 border-white/40 pb-2 flex items-center justify-between">
+                <input 
+                  type={isConPassVisible ? "text" : "password"} 
+                  className="w-full bg-transparent outline-none placeholder-white/80 text-lg px-2" 
+                  placeholder="Confirm Password" 
+                  name="conpassword"
+                  id="conpassword"
+                  required
+                />
+                
+                <span 
+                  onClick={() => setConPassVisible(!isConPassVisible)}
+                  className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity p-1"
+                  title={isConPassVisible ? "Hide Password" : "Show Password"}
+                >
+                  {isConPassVisible ? "🙈" : "👁️"}
+                </span>
+            </div>
+
+            
+            <button 
+              type="submit" 
+              className="w-full bg-white text-blue-900 font-extrabold py-4 rounded-full text-xl shadow-[0_10px_20px_rgba(255,255,255,0.3)] hover:shadow-white/40 hover:-translate-y-1 transition-all duration-300 active:scale-95 mt-4"
+            >
+              Change Password
+            </button>
+
+        </form>
+      </div>
     </div>
   );
 }

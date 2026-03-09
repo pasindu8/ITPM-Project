@@ -30,6 +30,9 @@ const userSchema = new mongoose.Schema({
     },
     verificationCode: {
         type: String
+    },
+    phoneNumber: {
+        type: String
     }
 });
 

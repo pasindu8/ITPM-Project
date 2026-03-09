@@ -31,15 +31,22 @@ function Login() {
         confirmButtonText: "OK",
       });
       return;
+    } 
+    localStorage.setItem("token", result.token);
+    localStorage.setItem("userId", result.userId);
+    localStorage.setItem("type", result.type);
+    event.target.reset();
+
+    if (result.type === 'admin') {
+        navigate("/AdminDashboard");
+        window.location.reload();
+    } else if (result.type === 'coach') {
+        navigate("/CoachDashboard");
+        window.location.reload();
     } else {
-        
-        navigate("/");
-        localStorage.setItem("token", result.token);
-        localStorage.setItem("userId", result.userId);
-        event.target.reset();
+        navigate("/Dashboard");
         window.location.reload();
       }
-
   }
 
   return (
@@ -61,7 +68,7 @@ function Login() {
             </div>
         </div>
 
-        <form className="flex flex-col space-y-8">
+        <form onSubmit={handleSubmit} className="flex flex-col space-y-8">
           
           <div className="border-b-2 border-white/40 pb-2 flex items-center">
             <span className="mr-3">👤</span>
