@@ -205,10 +205,9 @@ function AdminRegister() {
                         className="w-full bg-transparent outline-none text-white px-2 cursor-pointer [&>option]:text-black" // Option text black for visibility
                     >
                         <option value="" disabled selected>Select Role</option>
-                        <option value="moderator">Moderator</option>
-                        <option value="editor">Editor</option>
+                        <option value="lecturer">Lecturer</option>
+                        <option value="doctor">Doctor</option>
                         <option value="coach">Coach</option>
-                        <option value="admin">Admin</option>
                     </select>
                 </div>
             </div>

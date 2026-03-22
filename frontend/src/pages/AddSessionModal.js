@@ -103,7 +103,7 @@ const AddSessionModal = ({ isOpen, onClose }) => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="col-span-2">
                                         <label className="text-white/60 text-xs block mb-1">Date</label>
-                                        <input type="date" name="date" value={formData.date} onChange={handleChange} required className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white outline-none" />
+                                        <input type="date" name="date" min={new Date().toISOString().split('T')[0]} value={formData.date} onChange={handleChange} required className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white outline-none" />
                                     </div>
                                     <div>
                                         <label className="text-white/60 text-xs block mb-1">Start Time</label>
