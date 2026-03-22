@@ -37,11 +37,14 @@ function Login() {
     localStorage.setItem("type", result.type);
     event.target.reset();
 
-    if (result.type === 'admin') {
-        navigate("/AdminDashboard");
+    if (result.type === 'doctor') {
+        navigate("/DoctorDashboard");
         window.location.reload();
     } else if (result.type === 'coach') {
         navigate("/CoachDashboard");
+        window.location.reload();
+    }else if (result.type === 'lecturer') {
+        navigate("/LecturerDashboard");
         window.location.reload();
     } else {
         navigate("/Dashboard");

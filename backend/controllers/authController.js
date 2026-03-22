@@ -130,20 +130,20 @@ const registerAdmin = asyncHandler(async (req, res) => {
 
     if (adminCode === process.env.ADMIN_SECRET_KEY1) {
 
-        roletype = 'moderator';
+        roletype = 'lecturer';
 
-        if (role !== 'moderator') {
+        if (role !== 'lecturer') {
             res.status(400);
-            throw new Error('Role must be moderator for this admin secret key');
+            throw new Error('Role must be lecturer for this admin secret key');
         }
 
     } else if (adminCode === process.env.ADMIN_SECRET_KEY2) {
 
-        roletype = 'editor';
+        roletype = 'doctor';
 
-        if (role !== 'editor') {
+        if (role !== 'doctor') {
             res.status(400);
-            throw new Error('Role must be editor for this admin secret key');
+            throw new Error('Role must be doctor for this admin secret key');
         }
 
     } else if (adminCode === process.env.ADMIN_SECRET_KEY3) {
@@ -155,16 +155,7 @@ const registerAdmin = asyncHandler(async (req, res) => {
             throw new Error('Role must be coach for this admin secret key');
         }
 
-    } else if (adminCode === process.env.ADMIN_SECRET_KEY4) {
-
-        roletype = 'admin';
-
-        if (role !== 'admin') {
-            res.status(400);
-            throw new Error('Role must be admin for this admin secret key');
-        }
-
-    } else {
+    }  else {
         res.status(403);
         throw new Error('Invalid admin secret key');
     }
