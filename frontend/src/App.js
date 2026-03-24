@@ -4,7 +4,7 @@ import "./styles/App.css";
 import Footer from "./components/footer.js";
 import Header from "./components/header.js";
 
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 
 import Home from "./pages/home.js";
 import Login from "./pages/login.js";
@@ -35,6 +35,8 @@ import { useEffect, useState } from "react";
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
 
  useEffect(() => {
     const timer = setTimeout(() => {
@@ -66,10 +68,10 @@ function App() {
         </div>
       ) : (
         <div id="myDiv">
-          <Header />
-          <br />
-          <br />
-          <br />
+          {!isHomePage && <Header />}
+          {!isHomePage && <br />}
+          {!isHomePage && <br />}
+          {!isHomePage && <br />}
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -96,7 +98,7 @@ function App() {
             <Route path="/MatchScouter" element={<MatchScouter />} />
             <Route path="/MatchSummary/:sessionId" element={<MatchSummary />} />
           </Routes>
-          <Footer />
+          {!isHomePage && <Footer />}
         </div>
       )}
     </div>
