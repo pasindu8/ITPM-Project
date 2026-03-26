@@ -438,17 +438,11 @@ export default function SmartSportWelcome() {
           <div className="flex items-center gap-3">
             <div
               className="logo-box-glow flex items-center justify-center font-bold text-white text-sm"
-              style={{
-                width: 38, height: 38,
-                background: "linear-gradient(135deg, #2563eb, #3b82f6)",
-                borderRadius: 10,
-                fontSize: 54, fontWeight: 800,
-              }}
             >
               <img
                 src={logoMain}
                 alt="SmartSport logo"
-                style={{ width: "100px", height: "100px", objectFit: "contain" }}
+                style={{ width: "40px", height: "40px", objectFit: "contain", backgroundColor: "#ffffff", borderRadius: "50%" }}
               />
             </div>
             <div className="text-base font-bold" style={{ letterSpacing: "-0.3px" }}>
@@ -619,7 +613,7 @@ export default function SmartSportWelcome() {
                 <img
                 src={logoMain}
                 alt="SmartSport logo"
-                style={{ width: "100px", height: "100px", objectFit: "contain" }}
+                style={{ width: "100px", height: "100px", objectFit: "contain" ,backgroundColor: "#ffffff", borderRadius: "50%" }}
               />
               </center>
                 </span>

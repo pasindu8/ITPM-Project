@@ -4,7 +4,7 @@ import "./styles/App.css";
 import Footer from "./components/footer.js";
 import Header from "./components/header.js";
 
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from 'react-router-dom';
 
 import Home from "./pages/home.js";
 import Login from "./pages/login.js";
@@ -30,7 +30,34 @@ import LineupOptimizer from "./pages/LineupOptimizer.js";
 import MatchScouter from "./pages/MatchScouter.js";
 import MatchSummary from "./pages/MatchSummary.js";
  
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+
+// Title එක වෙනස් කරන Logic එක මෙතන තියෙන්නේ
+const TitleUpdater = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const titles = {
+      '/': 'SmartSport | Welcome',
+      '/login': 'SmartSport | Login',
+      '/register': 'SmartSport | Register',
+      '/Dashboard': 'SmartSport | Dashboard',
+      '/CoachDashboard': 'SmartSport | Coach Dashboard',
+      '/ScheduleAndConflicts': 'SmartSport | Schedule & Conflicts',
+      '/EquipmentInventory': 'SmartSport | Equipment & Inventory',
+      '/SendAlerts': 'SmartSport | Send Alerts',
+      '/PlayerManagement': 'SmartSport | Players',
+      '/QrAttendance': 'SmartSport | Attendance',
+      '/PerformanceAnalytics': 'SmartSport | Analytics',
+      '/MatchHistory': 'SmartSport | Match Records'
+    };
+
+    // මෙතනදී titles[location.pathname] හරියටම ගැලපෙන්න ඕනේ (Capital/Small letters සහා)
+    document.title = titles[location.pathname] || 'SmartSport';
+  }, [location]);
+
+  return null; 
+};
 
 
 function App() {
@@ -39,6 +66,7 @@ function App() {
   const isHomePage = location.pathname === "/";
 
  useEffect(() => {
+  document.title = "Loading . . .";
     const timer = setTimeout(() => {
       setLoading(false);
     }, 3000);
@@ -68,10 +96,9 @@ function App() {
         </div>
       ) : (
         <div id="myDiv">
+          <TitleUpdater />
           {!isHomePage && <Header />}
-          {!isHomePage && <br />}
-          {!isHomePage && <br />}
-          {!isHomePage && <br />}
+
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
