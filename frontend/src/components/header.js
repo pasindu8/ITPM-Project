@@ -1,6 +1,8 @@
 
 import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import logoMain from "../assets/logo1v3.png";
+import "../styles/header.css"; 
 
 function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -27,57 +29,82 @@ function Header() {
     }`;
 
   return (
-    // z-50 නිසා අනිත් හැමදේටම වඩා මේක උඩින් පේනවා. fixed නිසා උඩටම ඇලිලා තියෙනවා
-    <header className="fixed top-0 left-0 right-0 z-50 p-2 bg-transparent shadow-lg backdrop-blur-md border border-white/20">
-      <nav className="max-w-7xl mx-auto bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-6 py-3 flex justify-between items-center shadow-2xl">
-        
-        {/* Logo Section */}
-        <div className="flex items-center gap-3">
-           {/* ඔයාගේ Logo එක තියෙනවා නම් මේක පාවිච්චි කරන්න */}
-           {/* <img src={headerlogo} alt="Logo" className="h-10 w-auto object-contain" /> */}
-           
-           {/* Logo එක නැති වෙලාවට පේන්න ලස්සන Text එකක් */}
-           <div className="flex items-center gap-2 cursor-pointer">
-              <span className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black text-xl shadow-lg">S</span>
-              <span className="text-xl font-black text-white tracking-widest uppercase">SportsPro</span>
-           </div>
-        </div>
+    <header>
+      <div className="header-inner">
 
-        {/* Navigation Links */}
-        <ul className="flex items-center gap-2 m-0 p-0 list-none">
-          <li>
-            <NavLink to="/" end className={navItemClass}>
-              Home
-            </NavLink>
-          </li>
-          
+        <a href="#" className="logo">
+          <div className="logo-icon">
+            <img
+              src={logoMain}
+              alt="SmartSport logo"
+              style={{ width: "40px", height: "40px", objectFit: "contain", backgroundColor: "#ffffff", borderRadius: "50%" }}
+            />
+          </div>
+          <span className="logo-text">Smart<span>Sport</span></span>
+        </a>
+
+        
+        <div className="header-actions">
+
           {!isLoggedIn && (
             <>
               <li>
-                <NavLink to="/login" className={navItemClass}>
+                <NavLink to="/login" className="login-btn">
                   Login
-                </NavLink>
-              </li>
-              <li className="ml-2">
-                <NavLink to="/register" className={signUpClass}>
-                  Sign Up
                 </NavLink>
               </li>
             </>
           )}
 
           {isLoggedIn && (
-            <li className="ml-2">
-              <NavLink 
-                to="/logout" 
-                className="px-5 py-2 rounded-xl font-bold transition-all duration-300 bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500 hover:text-white shadow-lg"
-              >
+            <>
+            <div className="notif-wrapper">
+            <button className="notif-btn" aria-label="Notifications">
+              <svg viewBox="0 0 24 24">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              <span className="notif-badge"></span>
+            </button>
+
+            <div className="notif-dropdown">
+              <div className="notif-header">Notifications</div>
+
+              <div className="notif-item">
+                <span className="notif-dot new"></span>
+                <div>
+                  <div className="notif-msg">Your match analysis for <strong>Chelsea vs Arsenal</strong> is ready.</div>
+                  <div className="notif-time">2 minutes ago</div>
+                </div>
+              </div>
+
+              <div className="notif-item">
+                <span className="notif-dot new"></span>
+                <div>
+                  <div className="notif-msg"><strong>Live now:</strong> NBA — Lakers vs Heat. Score update available.</div>
+                  <div className="notif-time">10 minutes ago</div>
+                </div>
+              </div>
+
+              <div className="notif-item">
+                <span className="notif-dot read"></span>
+                <div>
+                  <div className="notif-msg">Your weekly performance report has been generated.</div>
+                  <div className="notif-time">Yesterday</div>
+                </div>
+              </div>
+            </div>
+          </div>
+            <li>
+              <NavLink to="/logout" className="login-btn">
                 Logout
               </NavLink>
             </li>
+            </>
           )}
-        </ul>
-      </nav>
+
+        </div>
+      </div>
     </header>
   );
 }
