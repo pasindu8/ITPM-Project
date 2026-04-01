@@ -1,4 +1,4 @@
-import { NavLink, Navigate } from 'react-router-dom';
+import { NavLink} from 'react-router-dom';
 
 function Sidebar() {
 
@@ -16,6 +16,10 @@ function Sidebar() {
       <h2 className="text-2xl font-bold text-white text-center mb-6 tracking-wide">Coach Panel</h2>
 
       <nav className="flex flex-col gap-2">
+        <NavLink to="/" className={navItemClass}>
+          <span>🏠</span> Home
+        </NavLink>
+
         <NavLink to="/CoachDashboard" className={navItemClass}>
           <span>🏠</span> Dashboard
         </NavLink>

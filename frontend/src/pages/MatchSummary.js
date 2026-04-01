@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable'; // මෙන්න මෙහෙම Import කරන්න
+import Loader from "../components/Loader.js";
 
 const MatchSummary = () => {
     const { sessionId } = useParams();
@@ -50,7 +51,7 @@ const MatchSummary = () => {
         doc.save(`Match_Report_${summary.session.opponent}.pdf`);
     };
 
-    if (!summary) return <div className="text-white text-center p-10">Loading Summary...</div>;
+    if (!summary) return <Loader />;
 
     return (
         <div className="min-h-screen bg-gray-950 text-white p-8">

@@ -20,6 +20,18 @@ function Register() {
     
     e.preventDefault();
 
+    const slPhoneRegex = /^(?:0|94|\+94)?(7[0-9]{8})$/;
+
+    if (phoneNumber === "" || !slPhoneRegex.test(phoneNumber)) {
+        Swal.fire({
+            icon: "error",
+            title: "Phone Verification Failed",
+            text: "Please enter a valid phone number.",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#d33",
+        });
+        return;
+    }
     const cleanedNumber = phoneNumber.replace("+", "");
 
     const data = {
@@ -160,6 +172,8 @@ function Register() {
                   className="w-full bg-transparent outline-none placeholder-white/70 text-lg px-2" 
                   placeholder="Full Name" 
                   name="name"
+                  pattern="^[A-Za-z .]{3,20}$" 
+                  title="Full name should only contain letters, spaces, and dots. (3-20 characters)"
                   required
                 />
             </div>
@@ -171,6 +185,8 @@ function Register() {
                   className="w-full bg-transparent outline-none placeholder-white/70 text-lg px-2" 
                   placeholder="Email Address" 
                   name="email"
+                  pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" 
+                  title="Please enter a valid email address"
                   required
                 />
             </div>
@@ -182,6 +198,8 @@ function Register() {
                   className="w-full bg-transparent outline-none placeholder-white/70 text-lg px-2" 
                   placeholder="Username" 
                   name="username"
+                  pattern="^[A-Za-z0-9_]{3,10}$" 
+                  title="Username should only contain letters, numbers, and underscores. (3-10 characters)"
                   required
                 />
             </div>
@@ -194,6 +212,10 @@ function Register() {
                   placeholder="Password" 
                   id="password" 
                   name="password"
+                  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-]).{8,}$" 
+                  title="Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+                  minLength="8"
+                  maxLength="20"
                   required
                 />
                 <img 
@@ -212,6 +234,10 @@ function Register() {
                   placeholder="Confirm Password" 
                   id="conpassword" 
                   name="conpassword"
+                  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-]).{8,}$" 
+                  title="Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+                  minLength="8"
+                  maxLength="20"
                   required
                 />
                 <img 
@@ -229,9 +255,11 @@ function Register() {
                         type="tel" 
                         className="w-[200px] flex-grow bg-transparent outline-none text-white placeholder-white/80 px-2 text-lg" 
                         placeholder="+94 7X XXXXXXX"
-                        maxLength="12"  
+                        maxLength="12"
+                        minLength="12"  
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
+                        required
                     />
                     <button 
                         type="button" 

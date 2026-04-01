@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Swal from "sweetalert2";
 import bgImage from '../assets/6903344.jpg';
 import Sidebar from '../components/Sidebar.js';
+import Loader from "../components/Loader.js";
 
 
 function SendAlerts() {
-    const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    const [setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [dashboardData, setDashboardData] = useState(null);
+    const [setDashboardData] = useState(null);
     const [students, setStudents] = useState([]); // ශිෂ්‍යයන් තබා ගැනීමට
     const [selectedAudience, setSelectedAudience] = useState("all"); // තෝරාගත් ශිෂ්‍යයා
 
@@ -82,9 +81,7 @@ function SendAlerts() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
+            <Loader />
         );
     }
 

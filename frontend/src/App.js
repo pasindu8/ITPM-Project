@@ -3,8 +3,9 @@ import "./styles/App.css";
 
 import Footer from "./components/footer.js";
 import Header from "./components/header.js";
+import Loader from "./components/Loader.js";
 
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom';
 
 import Home from "./pages/home.js";
 import Login from "./pages/login.js";
@@ -29,6 +30,9 @@ import AddSessionModal from "./pages/AddSessionModal.js";
 import LineupOptimizer from "./pages/LineupOptimizer.js";
 import MatchScouter from "./pages/MatchScouter.js";
 import MatchSummary from "./pages/MatchSummary.js";
+import NextRegisterCoach from "./pages/NextRegisterCoach.js";
+import GradeSession from "./pages/GradeSession.js";
+import { getStoredToken, isTokenValid, clearAuthStorage } from "./utils/auth";
  
 import React, { useEffect, useState } from 'react';
 
@@ -59,11 +63,116 @@ const TitleUpdater = () => {
   return null; 
 };
 
+// 2. ලොග් වෙලා නැති අයට සහ අදාළ type එක නැති අයට යන්න බැරි වෙන්න හදන කෝඩ් එක (Protected Route)
+const ProtectedRoute = ({ children, allowedTypes }) => {
+  const token = getStoredToken();
+  const isAuthenticated = isTokenValid(token);
+  const type = localStorage.getItem("type"); 
+
+  // 1. ලොග් වෙලා නැත්නම් කෙලින්ම Login යවනවා
+  if (!isAuthenticated) {
+    clearAuthStorage();
+    return <Navigate to="/login" replace />; 
+  }
+
+  // 2. අදාළ පේජ් එකට යන්න මේ type එකට අවසර නැත්නම් (Unauthorized)
+  if (allowedTypes && !allowedTypes.includes(type)) {
+    // එයාව එයාගේ අදාළ Dashboard එකට ආපහු හරවලා යවනවා
+    if (type === "user") return <Navigate to="/Dashboard" />;
+    if (type === "coach") return <Navigate to="/CoachDashboard" />;
+    if (type === "doctor") return <Navigate to="/DoctorDashboard" />;
+    if (type === "lecturer") return <Navigate to="/LecturerDashboard" />;
+    
+    return <Navigate to="/" />; // වෙන මුකුත් නැත්නම් Home එකට යවනවා
+  }
+
+  // 3. ලොග් වෙලත් ඉන්නවා, අවසරත් තියෙනවා නම් පේජ් එක පෙන්වනවා
+  return children;
+};
+
+const PublicRoute = ({ children }) => {
+
+  // මෙතන "token" වෙනුවට ඔයා ලොග් වුණාම localStorage එකේ සේව් කරන නම දාන්න (උදා: "user")
+
+  const token = getStoredToken();
+  const isAuthenticated = isTokenValid(token);
+
+  const types = localStorage.getItem("type");
+
+  if (!isAuthenticated && token) {
+    clearAuthStorage();
+  }
+
+ 
+
+  if (isAuthenticated && (types === "user")) {
+
+    return <Navigate to="/Dashboard" />; // ලොග් වෙලා නම් කෙලින්ම Dashboard යවනවා
+
+  }
+
+    else if (isAuthenticated && (types === "coach")) {
+
+    return <Navigate to="/CoachDashboard" />; // ලොග් වෙලා නම් කෙලින්ම CoachDashboard යවනවා
+
+  }
+
+    else if (isAuthenticated && (types === "doctor")) {
+
+    return <Navigate to="/DoctorDashboard" />; // ලොග් වෙලා නම් කෙලින්ම DoctorDashboard යවනවා
+
+  }
+
+    else if (isAuthenticated && (types === "lecturer")) {
+
+    return <Navigate to="/LecturerDashboard" />; // ලොග් වෙලා නම් කෙලින්ම LecturerDashboard යවනවා
+
+  }
+
+  return children;
+
+};
 
 function App() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
+
+  useEffect(() => {
+    const publicPaths = [
+      "/",
+      "/login",
+      "/register",
+      "/nextRegisterCoach",
+      "/nextRegisterSTU",
+      "/verification",
+      "/forgotpassword",
+      "/adminregister",
+      "/logout"
+    ];
+
+    const validateSession = () => {
+      const token = getStoredToken();
+
+      if (!token) {
+        return;
+      }
+
+      if (!isTokenValid(token)) {
+        clearAuthStorage();
+
+        if (!publicPaths.includes(location.pathname)) {
+          navigate("/login", { replace: true });
+        }
+      }
+    };
+
+    validateSession();
+    const intervalId = setInterval(validateSession, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [location.pathname, navigate]);
 
  useEffect(() => {
   document.title = "Loading . . .";
@@ -77,23 +186,7 @@ function App() {
   return (
     <div>
       {loading ? (
-        <div className="loader" >
-            <div className="pl">
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__dot"></div>
-            <div className="pl__text">Loading…</div>
-            </div>
-        </div>
+        <Loader />
       ) : (
         <div id="myDiv">
           <TitleUpdater />
@@ -101,29 +194,127 @@ function App() {
 
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/verification" element={<Verification />} />
-            <Route path="/forgotpassword" element={<ForgotPassword />} />
+            <Route path="/login" element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }/>
+            <Route path="/register" element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            } />
+            <Route path="/nextRegisterCoach" element={
+              <PublicRoute>
+                <NextRegisterCoach />
+              </PublicRoute>
+            } />
+            <Route path="/nextRegisterSTU" element={
+              <PublicRoute >
+                <NextregisterSTU />
+              </PublicRoute>
+            } />
+            <Route path="/verification" element={
+              <PublicRoute>
+                <Verification />
+              </PublicRoute>
+            } />
+            <Route path="/forgotpassword" element={
+              <PublicRoute>
+                <ForgotPassword />
+              </PublicRoute>
+            } />
             <Route path="/logout" element={<Logout />} />
-            <Route path="/adminregister" element={<AdminRegister />} />
-            <Route path="/Profile" element={<Profile />} />
-            <Route path="/Dashboard" element={<Dashboard />} />
-            <Route path="/CoachDashboard" element={<CoachDashboard />} />
-            <Route path="/ScheduleAndConflicts" element={<ScheduleAndConflicts />} />
-            <Route path="/QrAttendance" element={<QrAttendance />} />
-            <Route path="/QrAttendance/:sessionId" element={<QrAttendance />} />
-            <Route path="/PlayerManagement" element={<PlayerManagement />} />
-            <Route path="/SendAlerts" element={<SendAlerts />} />
-            <Route path="/PerformanceAnalytics" element={<PerformanceAnalytics />} />
-            <Route path="/TrainingDrillLibrary" element={<TrainingDrillLibrary />} />
-            <Route path="/MatchHistory" element={<MatchHistory />} />
-            <Route path="/EquipmentInventory" element={<EquipmentInventory />} />
-            <Route path="/nextRegisterSTU" element={<NextregisterSTU />} />
-            <Route path="/AddSessionModal" element={<AddSessionModal />} />
-            <Route path="/LineupOptimizer" element={<LineupOptimizer />} />
-            <Route path="/MatchScouter" element={<MatchScouter />} />
-            <Route path="/MatchSummary/:sessionId" element={<MatchSummary />} />
+            <Route path="/adminregister" element={
+              <PublicRoute>
+                <AdminRegister />
+              </PublicRoute>
+            } />
+            <Route path="/Profile" element={
+              <ProtectedRoute allowedTypes={["user", "coach", "doctor", "lecturer"]}>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/Dashboard" element={
+              <ProtectedRoute allowedTypes={["user"]}>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/CoachDashboard" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <CoachDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/ScheduleAndConflicts" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <ScheduleAndConflicts />
+              </ProtectedRoute>
+            } />
+            <Route path="/QrAttendance" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <QrAttendance />
+              </ProtectedRoute>
+            } />
+            <Route path="/QrAttendance/:sessionId" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <QrAttendance />
+              </ProtectedRoute>
+            } />
+            <Route path="/PlayerManagement" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <PlayerManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/SendAlerts" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <SendAlerts />
+              </ProtectedRoute>
+            } />
+            <Route path="/PerformanceAnalytics" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <PerformanceAnalytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/TrainingDrillLibrary" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <TrainingDrillLibrary />
+              </ProtectedRoute>
+            } />
+            <Route path="/MatchHistory" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <MatchHistory />
+              </ProtectedRoute>
+            } />
+            <Route path="/EquipmentInventory" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <EquipmentInventory />
+              </ProtectedRoute>
+            } />
+            <Route path="/AddSessionModal" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <AddSessionModal />
+              </ProtectedRoute>
+            } />
+            <Route path="/LineupOptimizer" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <LineupOptimizer />
+              </ProtectedRoute>
+            } />
+            <Route path="/MatchScouter" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <MatchScouter />
+              </ProtectedRoute>
+            } />
+            <Route path="/MatchSummary/:sessionId" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                <MatchSummary />
+              </ProtectedRoute>
+            } />
+            <Route path="/grade-session/:sessionId" element={
+              <ProtectedRoute allowedTypes={["coach"]}>
+                 <GradeSession />
+              </ProtectedRoute>
+            } />
           </Routes>
           {!isHomePage && <Footer />}
         </div>

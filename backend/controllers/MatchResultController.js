@@ -7,7 +7,7 @@ const Coach = require('../models/Coach');
 // @access  Private (Coach)
 const addMatchResult = asyncHandler(async (req, res) => {
     const { tournament, opponent, date, result, score, mom, venue, notes } = req.body;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     // Verify coach exists
     const coach = await Coach.findOne({ userId });
@@ -44,7 +44,7 @@ const addMatchResult = asyncHandler(async (req, res) => {
 // @route   GET /matchresult/all
 // @access  Private (Coach)
 const getAllMatchResults = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const coach = await Coach.findOne({ userId });
     if (!coach) {
@@ -79,7 +79,7 @@ const getAllMatchResults = asyncHandler(async (req, res) => {
 // @access  Private (Coach)
 const getMatchResultById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const coach = await Coach.findOne({ userId });
     if (!coach) {
@@ -100,7 +100,7 @@ const getMatchResultById = asyncHandler(async (req, res) => {
 // @access  Private (Coach)
 const updateMatchResult = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { tournament, opponent, date, result, score, mom, venue, notes } = req.body;
 
     const coach = await Coach.findOne({ userId });
@@ -137,7 +137,7 @@ const updateMatchResult = asyncHandler(async (req, res) => {
 // @access  Private (Coach)
 const deleteMatchResult = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const coach = await Coach.findOne({ userId });
     if (!coach) {
@@ -159,7 +159,7 @@ const deleteMatchResult = asyncHandler(async (req, res) => {
 // @access  Private (Coach)
 const getMatchResultsByType = asyncHandler(async (req, res) => {
     const { resultType } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const coach = await Coach.findOne({ userId });
     if (!coach) {
