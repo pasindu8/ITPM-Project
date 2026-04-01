@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
 const AddSessionModal = ({ isOpen, onClose }) => {
@@ -12,6 +12,16 @@ const AddSessionModal = ({ isOpen, onClose }) => {
         team: '',
         description: ''
     });
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        document.body.classList.add('hide-app-header');
+
+        return () => {
+            document.body.classList.remove('hide-app-header');
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 

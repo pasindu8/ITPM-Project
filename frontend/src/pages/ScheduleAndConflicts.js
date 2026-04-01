@@ -3,11 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import bgImage from '../assets/6903344.jpg';
 import Sidebar from '../components/Sidebar.js';
 import AddSessionModal from './AddSessionModal.js';
+import GradeSession from './GradeSession.js';
 import Swal from 'sweetalert2';
 
 function ScheduleAndConflicts() {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
+    const [selectedSession, setSelectedSession] = useState(null);
+    const [conflicts, sets] = useState([]); // දත්ත ගබඩා කිරීමට
     const [sessions, setSessions] = useState([]); // දත්ත ගබඩා කිරීමට
     const [loading, setLoading] = useState(true);
 
@@ -57,6 +61,9 @@ function ScheduleAndConflicts() {
         }
     };
 
+    const handleGradeSession = (sessionId) => {
+        navigate(`/grade-session/${sessionId}`);
+    };
     return (
         <div 
             className="min-h-screen w-full flex flex-col md:flex-row bg-cover bg-center bg-no-repeat p-4 gap-4" 
@@ -146,9 +153,10 @@ function ScheduleAndConflicts() {
                                                     </button>
                                                 </>
                                             ) : (
-                                                <span className="bg-green-500/20 text-green-400 border border-green-500/40 px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-widest">
-                                                    All Clear
-                                                </span>
+                                                <button className="bg-green-500/20 text-green-400 border border-green-500/40 px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-widest"
+                                                    onClick={() => handleGradeSession(session._id)}>
+                                                    Grade Session
+                                                </button>
                                             )}
                                         </div>
                                     </div>

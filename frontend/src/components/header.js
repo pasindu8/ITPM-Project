@@ -3,30 +3,34 @@ import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import logoMain from "../assets/logo1v3.png";
 import "../styles/header.css"; 
+import { getStoredToken, isTokenValid, clearAuthStorage } from "../utils/auth";
 
 function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
+    const syncAuthState = () => {
+      const token = getStoredToken();
+      const isValid = isTokenValid(token);
+
+      if (!isValid && token) {
+        clearAuthStorage();
+      }
+
+      setIsLoggedIn(isValid);
+    };
+
+    syncAuthState();
+
+    const intervalId = setInterval(syncAuthState, 30000);
+    window.addEventListener("storage", syncAuthState);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("storage", syncAuthState);
+    };
   }, []);
 
-  // සාමාන්‍ය Link එකකට දෙන Style එක (Active නම් නිල් පාට වෙනවා, නැත්නම් සාමාන්‍ය විදිහට පේනවා)
-  const navItemClass = ({ isActive }) => 
-    `px-5 py-2 rounded-xl font-semibold transition-all duration-300 ${
-      isActive 
-        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" 
-        : "text-white/80 hover:bg-white/10 hover:text-white"
-    }`;
-
-  // Sign Up එකට වෙනස් පෙනුමක් දෙන්න (Border එකක් එක්ක)
-  const signUpClass = ({ isActive }) => 
-    `px-5 py-2 rounded-xl font-bold transition-all duration-300 border ${
-      isActive 
-        ? "bg-white text-blue-900 border-white shadow-lg" 
-        : "bg-transparent text-white border-white/30 hover:bg-white/20"
-    }`;
 
   return (
     <header>

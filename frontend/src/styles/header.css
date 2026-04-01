@@ -1,3 +1,7 @@
+    body.hide-app-header header {
+      display: none;
+    }
+
     header {
       position: sticky;
       top: 0;

@@ -7,10 +7,10 @@ const Student = require('../models/Student');
 // 1. AI Lineup Optimizer - Weighted Scoring Logic
 exports.getAIRecommendedLineup = asyncHandler(async (req, res) => {
     // Coach ගේ sport එකට අදාළ players ලා පමණක් ගැනීම
-    const coachid = req.user._id;// req.user එකෙන් coachid එක ගන්නවා
+    const coachid = req.user.id;// req.user එකෙන් coachid එක ගන්නවා
     const coachSport = await Coach.findById(coachid).select('sport');// Coach model එකෙන් coachid එකට අදාළ sport එක ගන්නවා
     const playersSport = await Student.find({ sport: coachSport.sport });// Student model එකෙන් coachSport.sport එකට අදාළ players ලා ගන්නවා
-    const players = await User.find({ type: 'user', _id: { $in: playersSport.map(p => p._id) } });// User model එකෙන් playersSport.map(p => p._id) එකට අදාළ players ලා ගන්නවා
+    const players = await User.find({ type: 'user', id: { $in: playersSport.map(p => p.id) } });// User model එකෙන් playersSport.map(p => p.id) එකට අදාළ players ලා ගන්නවා
 
     const optimizedPlayers = players.map(p => {
         // AI Algorithm: (Rating * 0.5) + (Fitness * 0.3) + (Attendance * 0.2)
@@ -37,7 +37,7 @@ exports.startMatchSession = asyncHandler(async (req, res) => {
     const session = await MatchSession.create({
         opponent: req.body.opponent,
         venue: req.body.venue,
-        coachId: req.user._id
+        coachId: req.user.id
     });
     res.status(201).json({ success: true, data: session });
 });

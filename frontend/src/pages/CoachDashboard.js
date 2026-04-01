@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Swal from "sweetalert2";
+import { Link } from 'react-router-dom';
 import bgImage from '../assets/6903344.jpg';
 import Sidebar from '../components/Sidebar.js';
 import TimeAgo from 'timeago-react';
+import Loader from "../components/Loader.js";
 
 
 function CoachDashboard() {
-    const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    const [setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [dashboardData, setDashboardData] = useState(null);
 
@@ -42,9 +41,7 @@ function CoachDashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
+            <Loader />
         );
     }
 

@@ -6,6 +6,7 @@ const asyncHandler = require('../middleware/asyncHandler');
 const sendEmail = require('../utils/sendEmail');
 const axios = require("axios");
 const Student = require('../models/Student');
+const Coach = require('../models/Coach');
 
 const registerUser = asyncHandler(async (req, res) => {
     const { name, email, username, password, conpassword, phoneNumber } = req.body;
@@ -354,4 +355,35 @@ const resendotp = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { registerUser, registerSTU, registerAdmin, login, getProfile, verifyUser, forgotPassword, phoneVerification, resendotp };
+const CoachSport = asyncHandler(async (req, res) => {
+
+    const { userId, sport } = req.body;
+
+    
+    const user = await User.findById(userId);
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+    
+    const coachExists = await Coach.findOne({ userId: userId });
+    
+    if (coachExists) {
+        res.status(400);
+        throw new Error('Coach already exists');
+    }
+    
+    const coach = await Coach.create({ 
+        userId: userId,
+        sport: sport
+    });
+    
+
+    res.json({ 
+        message: 'Coach sport assigned successfully',
+        userId: user._id
+    });
+});
+
+module.exports = { registerUser, registerSTU, registerAdmin, login, getProfile, verifyUser, forgotPassword, phoneVerification, resendotp, CoachSport };

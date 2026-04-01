@@ -21,6 +21,19 @@ function AdminRegister() {
     
     e.preventDefault();
 
+    const slPhoneRegex = /^(?:0|94|\+94)?(7[0-9]{8})$/;
+
+    if (phoneNumber === "" || !slPhoneRegex.test(phoneNumber)) {
+        Swal.fire({
+            icon: "error",
+            title: "Phone Verification Failed",
+            text: "Please enter a valid phone number.",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#d33",
+        });
+        return;
+    }
+
     const cleanedNumber = phoneNumber.replace("+", "");
 
     const data = {
@@ -134,7 +147,11 @@ function AdminRegister() {
             confirmButtonColor: "#3085d6",
             }).then((result) => {
             if (result.isConfirmed) {
-                navigate("/verification");
+                if (data.role === "coach") {
+                    navigate("/NextRegisterCoach");
+                } else {
+                     navigate("/verification");
+                }
             }
             });
             localStorage.setItem("userId", result.userId);
@@ -184,18 +201,27 @@ function AdminRegister() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Name */}
                 <div className="border-b border-white/40 pb-2">
-                    <input type="text" className="w-full bg-transparent outline-none placeholder-white/70 px-2" placeholder="Full Name" name="name" required />
+                    <input type="text" className="w-full bg-transparent outline-none placeholder-white/70 px-2" placeholder="Full Name" name="name" 
+                        pattern="^[A-Za-z .]{3,20}$" 
+                        title="Full name should only contain letters, spaces, and dots. (3-20 characters)"
+                        required />
                 </div>
                 {/* Email */}
                 <div className="border-b border-white/40 pb-2">
-                    <input type="email" className="w-full bg-transparent outline-none placeholder-white/70 px-2" placeholder="Email" name="email" required />
+                    <input type="email" className="w-full bg-transparent outline-none placeholder-white/70 px-2" placeholder="Email" name="email" 
+                        pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" 
+                        title="Please enter a valid email address"
+                        required />
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  {/* Username */}
                 <div className="border-b border-white/40 pb-2">
-                    <input type="text" className="w-full bg-transparent outline-none placeholder-white/70 px-2" placeholder="Username" name="username" required />
+                    <input type="text" className="w-full bg-transparent outline-none placeholder-white/70 px-2" placeholder="Username" name="username" 
+                        pattern="^[A-Za-z0-9_]{3,10}$" 
+                        title="Username should only contain letters, numbers, and underscores. (3-10 characters)"
+                        required />
                 </div>
                 
                 {/* Role Selection Dropdown */}
@@ -214,12 +240,22 @@ function AdminRegister() {
 
             {/* Passwords */}
             <div className="border-b border-white/40 pb-2 flex items-center justify-between">
-                <input type={isPassVisible ? "text" : "password"} className="w-full bg-transparent outline-none placeholder-white/70 px-2" placeholder="Password" name="password" required />
+                <input type={isPassVisible ? "text" : "password"} className="w-full bg-transparent outline-none placeholder-white/70 px-2" placeholder="Password" name="password" 
+                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-]).{8,}$" 
+                    title="Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+                    minLength="8"
+                    maxLength="20"
+                    required />
                 <img src={isPassVisible ? show : hide} onClick={() => setPassVisible(!isPassVisible)} className="w-5 h-5 cursor-pointer opacity-70 invert" alt="toggle"/>
             </div>
 
             <div className="border-b border-white/40 pb-2 flex items-center justify-between">
-                <input type={isConPassVisible ? "text" : "password"} className="w-full bg-transparent outline-none placeholder-white/70 px-2" placeholder="Confirm Password" name="conpassword" required />
+                <input type={isConPassVisible ? "text" : "password"} className="w-full bg-transparent outline-none placeholder-white/70 px-2" placeholder="Confirm Password" name="conpassword" 
+                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-]).{8,}$" 
+                    title="Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+                    minLength="8"
+                    maxLength="20"
+                    required />
                 <img src={isConPassVisible ? show : hide} onClick={() => setConPassVisible(!isConPassVisible)} className="w-5 h-5 cursor-pointer opacity-70 invert" alt="toggle"/>
             </div>
 

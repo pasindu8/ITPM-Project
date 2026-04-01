@@ -2,6 +2,7 @@ import bgImage from '../assets/6903344.jpg';
 import Sidebar from '../components/Sidebar.js';
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import Loader from "../components/Loader.js";
 
 function TrainingDrillLibrary() {
     const [drills, setDrills] = useState([]);
@@ -9,7 +10,6 @@ function TrainingDrillLibrary() {
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('All Drills');
     const [searchQuery, setSearchQuery] = useState('');
-    const [showAddModal, setShowAddModal] = useState(false);
 
     useEffect(() => {
         fetchDrills();
@@ -179,9 +179,7 @@ function TrainingDrillLibrary() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
+            <Loader />
         );
     }
 
