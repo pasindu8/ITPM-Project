@@ -62,43 +62,7 @@ function Header() {
 
           {isLoggedIn && (
             <>
-            <div className="notif-wrapper">
-            <button className="notif-btn" aria-label="Notifications">
-              <svg viewBox="0 0 24 24">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-              </svg>
-              <span className="notif-badge"></span>
-            </button>
-
-            <div className="notif-dropdown">
-              <div className="notif-header">Notifications</div>
-
-              <div className="notif-item">
-                <span className="notif-dot new"></span>
-                <div>
-                  <div className="notif-msg">Your match analysis for <strong>Chelsea vs Arsenal</strong> is ready.</div>
-                  <div className="notif-time">2 minutes ago</div>
-                </div>
-              </div>
-
-              <div className="notif-item">
-                <span className="notif-dot new"></span>
-                <div>
-                  <div className="notif-msg"><strong>Live now:</strong> NBA — Lakers vs Heat. Score update available.</div>
-                  <div className="notif-time">10 minutes ago</div>
-                </div>
-              </div>
-
-              <div className="notif-item">
-                <span className="notif-dot read"></span>
-                <div>
-                  <div className="notif-msg">Your weekly performance report has been generated.</div>
-                  <div className="notif-time">Yesterday</div>
-                </div>
-              </div>
-            </div>
-          </div>
+           
             <li>
               <NavLink to="/logout" className="login-btn">
                 Logout
