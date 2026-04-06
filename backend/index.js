@@ -12,6 +12,7 @@ const InventoryRoutes = require('./routes/InventoryRoutes');
 const trainingDrillRoutes = require('./routes/trainingDrillRoutes');
 const matchResultRoutes = require('./routes/matchResultRoutes');
 const performanceRoutes = require('./routes/performanceRoutes');
+const doctorRoutes = require('./routes/doctorRoutes');
 const cors = require("cors");
 
 
@@ -31,6 +32,7 @@ app.use('/inventory', InventoryRoutes);
 app.use('/drills', trainingDrillRoutes);
 app.use('/matchresult', matchResultRoutes);
 app.use('/performance', performanceRoutes);
+app.use('/auth', doctorRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
