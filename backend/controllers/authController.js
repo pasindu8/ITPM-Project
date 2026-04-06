@@ -36,32 +36,32 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ 
+    const user = await User.create({
         name,
         email,
-        username,  
-        password: hashedPassword, 
+        username,
+        password: hashedPassword,
         phoneNumber,
         type: 'user',
         status: 'pending',
         verificationCode: Math.floor(100000 + Math.random() * 900000).toString()
     });
 
-    res.status(201).json({ 
+    res.status(201).json({
         userId: user._id
     });
 });
 
 const registerSTU = asyncHandler(async (req, res) => {
 
-    const {userId, studentId, faculty, academicYear, academicSemester, group, sport, playingStyle, bloodGroup, emergencyContact, allergiesMedicalConditions} = req.body;
+    const { userId, studentId, faculty, academicYear, academicSemester, group, sport, playingStyle, bloodGroup, emergencyContact, allergiesMedicalConditions } = req.body;
 
     if (!userId) {
         res.status(400);
         throw new Error('User ID is required');
     }
 
-    if (!studentId || !faculty || !academicYear || !academicSemester || !group || !sport || !playingStyle || !bloodGroup || !emergencyContact ) {
+    if (!studentId || !faculty || !academicYear || !academicSemester || !group || !sport || !playingStyle || !bloodGroup || !emergencyContact) {
         res.status(400);
         throw new Error('All fields are required');
     }
@@ -73,7 +73,7 @@ const registerSTU = asyncHandler(async (req, res) => {
         throw new Error('Student already exists');
     }
 
-    const newStudent = await Student.create({ 
+    const newStudent = await Student.create({
         userId: userId,
         studentId,
         faculty,
@@ -95,8 +95,8 @@ const registerSTU = asyncHandler(async (req, res) => {
         `Your verification code is: ${user.verificationCode}\n\nPlease enter this code on the verification page to activate your account.\n\nThank you for registering with ITPM!`
     );
 
-    res.status(201).json({ 
-        message: 'Student registered successfully', 
+    res.status(201).json({
+        message: 'Student registered successfully',
         studentId: newStudent.studentId,
         userId: newStudent.userId
     });
@@ -156,7 +156,7 @@ const registerAdmin = asyncHandler(async (req, res) => {
             throw new Error('Role must be coach for this admin secret key');
         }
 
-    }  else {
+    } else {
         res.status(403);
         throw new Error('Invalid admin secret key');
     }
@@ -164,11 +164,11 @@ const registerAdmin = asyncHandler(async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ 
+    const user = await User.create({
         name,
         email,
-        username,  
-        password: hashedPassword, 
+        username,
+        password: hashedPassword,
         phoneNumber,
         type: role,
         status: 'pending',
@@ -181,8 +181,8 @@ const registerAdmin = asyncHandler(async (req, res) => {
         `Your verification code is: ${user.verificationCode}\n\nPlease enter this code on the verification page to activate your account.\n\nThank you for registering with ITPM!`
     );
 
-    res.status(201).json({ 
-        message: 'Admin registered successfully', 
+    res.status(201).json({
+        message: 'Admin registered successfully',
         userId: user._id
     });
 });
@@ -210,13 +210,13 @@ const login = asyncHandler(async (req, res) => {
     }
 
     const token = jwt.sign(
-        {id: user._id},
+        { id: user._id },
         process.env.JWT_SECRET,
-        {expiresIn: '1h'}
+        { expiresIn: '1h' }
     );
-    
-    res.json({ 
-        message:'Login successful',
+
+    res.json({
+        message: 'Login successful',
         token,
         type: user.type,
         userId: user._id
@@ -244,7 +244,7 @@ const verifyUser = asyncHandler(async (req, res) => {
     user.status = 'active';
     await user.save();
 
-    res.json({ 
+    res.json({
         message: 'User verified successfully',
         userId: user._id
     });
@@ -253,7 +253,7 @@ const verifyUser = asyncHandler(async (req, res) => {
 const forgotPassword = asyncHandler(async (req, res) => {
     const { uname, password, conpassword } = req.body;
 
-    const user = await User.findOne({ $or: [{ username:uname }, { email: uname }]  });
+    const user = await User.findOne({ $or: [{ username: uname }, { email: uname }] });
     if (!user) {
         res.status(404);
         throw new Error('User not found');
@@ -280,7 +280,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     );
 
     await user.save();
-    res.status(201).json({ 
+    res.status(201).json({
         message: 'Password reset token sent to email',
         userId: user._id
     });
@@ -305,22 +305,22 @@ const phoneVerification = asyncHandler(async (req, res) => {
 
     try {
         await axios.post("https://resulting-orsola-pdbot-23be5163.koyeb.app/send-message",
-      {
-        number: phoneNumber,
-        message: `Your verification code is: ${phoneverificationCode}`
-      },
-      {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
+            {
+                number: phoneNumber,
+                message: `Your verification code is: ${phoneverificationCode}`
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
 
-    res.json({ 
-        message: 'Phone verification code sent successfully',
-        phoneverificationCode: phoneverificationCode,
-        phoneNumber: phoneNumber
-    });
+        res.json({
+            message: 'Phone verification code sent successfully',
+            phoneverificationCode: phoneverificationCode,
+            phoneNumber: phoneNumber
+        });
 
     } catch (error) {
         console.error("Error sending SMS:", error);
@@ -349,7 +349,7 @@ const resendotp = asyncHandler(async (req, res) => {
 
     await user.save();
 
-    res.json({ 
+    res.json({
         message: 'Verification code resent successfully',
         userId: user._id
     });
@@ -359,28 +359,28 @@ const CoachSport = asyncHandler(async (req, res) => {
 
     const { userId, sport } = req.body;
 
-    
+
     const user = await User.findById(userId);
 
     if (!user) {
         res.status(404);
         throw new Error('User not found');
     }
-    
+
     const coachExists = await Coach.findOne({ userId: userId });
-    
+
     if (coachExists) {
         res.status(400);
         throw new Error('Coach already exists');
     }
-    
-    const coach = await Coach.create({ 
+
+    const coach = await Coach.create({
         userId: userId,
         sport: sport
     });
-    
 
-    res.json({ 
+
+    res.json({
         message: 'Coach sport assigned successfully',
         userId: user._id
     });

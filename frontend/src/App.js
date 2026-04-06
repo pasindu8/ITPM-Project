@@ -38,7 +38,18 @@ import CourseMaterials from "./pages/CourseMaterials.js";
 import StudentMarks from "./pages/StudentMarks.js";
 import LecturerScheduleAndConflicts from "./pages/LecturerScheduleAndConflicts.js";
 import { getStoredToken, isTokenValid, clearAuthStorage } from "./utils/auth";
- 
+
+import Appointments from "./pages/Appointments.js";
+import DoctorDashboard from "./pages/DoctorDashboard.js";
+import InjuryReportForm from "./pages/InjuryReportForm.js";
+import InjuryReports from "./pages/InjuryReports.js";
+import RecoveryPlans from "./pages/RecoveryPlans.js";
+import MedicalProfile from "./pages/MedicalProfile.js";
+import MedicalClearance from "./pages/MedicalClearance.js";
+import FollowUpTracker from "./pages/FollowUpTracker.js";
+import TreatmentLog from "./pages/TreatmentLog.js";
+import EmergencyReferrals from "./pages/EmergencyReferrals.js";
+
 import React, { useEffect, useState } from 'react';
 
 // Title එක වෙනස් කරන Logic එක මෙතන තියෙන්නේ
@@ -64,6 +75,11 @@ const TitleUpdater = () => {
       '/CourseMaterials': 'SmartSport | Course Materials',
       '/StudentMarks': 'SmartSport | Student Marks',
       '/LecturerScheduleAndConflicts': 'SmartSport | Lecturer Schedule'
+      '/MedicalProfile': 'SmartSport | Medical Profiles',
+      '/MedicalClearance': 'SmartSport | Medical Clearance',
+      '/FollowupTracker': 'SmartSport | Follow-Up Tracker',
+      '/TreatmentLog': 'SmartSport | Treatment Log',
+      '/EmergencyReferrals': 'SmartSport | Emergency Referrals'
     };
 
     // මෙතනදී titles[location.pathname] හරියටම ගැලපෙන්න ඕනේ (Capital/Small letters සහා)
@@ -348,6 +364,54 @@ function App() {
             <Route path="/LecturerScheduleAndConflicts" element={
               <ProtectedRoute allowedTypes={["lecturer"]}>
                 <LecturerScheduleAndConflicts />
+            <Route path="/Appointments" element={
+              <ProtectedRoute allowedTypes={["doctor"]}>
+                 <Appointments />
+              </ProtectedRoute>
+            } />
+            <Route path="/DoctorDashboard" element={
+              <ProtectedRoute allowedTypes={["doctor"]}>
+                 <DoctorDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/Injuryreportform" element={
+              <ProtectedRoute allowedTypes={["doctor"]}>
+                 <InjuryReportForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/Injuryreports" element={
+              <ProtectedRoute allowedTypes={["doctor"]}>
+                 <InjuryReports />
+              </ProtectedRoute>
+            } />
+            <Route path="/Recoveryplans" element={
+              <ProtectedRoute allowedTypes={["doctor"]}>
+                 <RecoveryPlans />
+              </ProtectedRoute>
+            } />
+            <Route path="/MedicalProfile" element={
+              <ProtectedRoute allowedTypes={["doctor"]}>
+                 <MedicalProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/MedicalClearance" element={
+              <ProtectedRoute allowedTypes={["doctor"]}>
+                 <MedicalClearance />
+              </ProtectedRoute>
+            } />
+            <Route path="/FollowupTracker" element={
+              <ProtectedRoute allowedTypes={["doctor"]}>
+                 <FollowUpTracker />
+              </ProtectedRoute>
+            } />
+            <Route path="/TreatmentLog" element={
+              <ProtectedRoute allowedTypes={["doctor"]}>
+                 <TreatmentLog />
+              </ProtectedRoute>
+            } />
+            <Route path="/EmergencyReferrals" element={
+              <ProtectedRoute allowedTypes={["doctor"]}>
+                 <EmergencyReferrals />
               </ProtectedRoute>
             } />
           </Routes>
