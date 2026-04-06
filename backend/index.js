@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorMiddleware');
 const authRoutes = require('./routes/authRoutes');
@@ -12,6 +13,7 @@ const InventoryRoutes = require('./routes/InventoryRoutes');
 const trainingDrillRoutes = require('./routes/trainingDrillRoutes');
 const matchResultRoutes = require('./routes/matchResultRoutes');
 const performanceRoutes = require('./routes/performanceRoutes');
+const lecturerRoutes = require('./routes/lecturerRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
 const cors = require("cors");
 
@@ -19,6 +21,7 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 connectDB();
 
@@ -32,6 +35,7 @@ app.use('/inventory', InventoryRoutes);
 app.use('/drills', trainingDrillRoutes);
 app.use('/matchresult', matchResultRoutes);
 app.use('/performance', performanceRoutes);
+app.use('/lecturer', lecturerRoutes);
 app.use('/auth', doctorRoutes);
 app.use(errorHandler);
 
