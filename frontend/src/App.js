@@ -32,6 +32,11 @@ import MatchScouter from "./pages/MatchScouter.js";
 import MatchSummary from "./pages/MatchSummary.js";
 import NextRegisterCoach from "./pages/NextRegisterCoach.js";
 import GradeSession from "./pages/GradeSession.js";
+import LecturerDashboard from "./pages/LecturerDashboard.js";
+import SubjectManagement from "./pages/SubjectManagement.js";
+import CourseMaterials from "./pages/CourseMaterials.js";
+import StudentMarks from "./pages/StudentMarks.js";
+import LecturerScheduleAndConflicts from "./pages/LecturerScheduleAndConflicts.js";
 import { getStoredToken, isTokenValid, clearAuthStorage } from "./utils/auth";
 
 import Appointments from "./pages/Appointments.js";
@@ -71,6 +76,11 @@ const TitleUpdater = () => {
       '/QrAttendance': 'SmartSport | Attendance',
       '/PerformanceAnalytics': 'SmartSport | Analytics',
       '/MatchHistory': 'SmartSport | Match Records',
+      '/LecturerDashboard': 'SmartSport | Lecturer Dashboard',
+      '/SubjectManagement': 'SmartSport | Subject Management',
+      '/CourseMaterials': 'SmartSport | Course Materials',
+      '/StudentMarks': 'SmartSport | Student Marks',
+      '/LecturerScheduleAndConflicts': 'SmartSport | Lecturer Schedule'
       '/MedicalProfile': 'SmartSport | Medical Profiles',
       '/MedicalClearance': 'SmartSport | Medical Clearance',
       '/FollowupTracker': 'SmartSport | Follow-Up Tracker',
@@ -337,9 +347,29 @@ function App() {
                  <GradeSession />
               </ProtectedRoute>
             } />
-
-
-
+            <Route path="/LecturerDashboard" element={
+              <ProtectedRoute allowedTypes={["lecturer"]}>
+                <LecturerDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/SubjectManagement" element={
+              <ProtectedRoute allowedTypes={["lecturer"]}>
+                <SubjectManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/CourseMaterials" element={
+              <ProtectedRoute allowedTypes={["lecturer"]}>
+                <CourseMaterials />
+              </ProtectedRoute>
+            } />
+            <Route path="/StudentMarks" element={
+              <ProtectedRoute allowedTypes={["lecturer"]}>
+                <StudentMarks />
+              </ProtectedRoute>
+            } />
+            <Route path="/LecturerScheduleAndConflicts" element={
+              <ProtectedRoute allowedTypes={["lecturer"]}>
+                <LecturerScheduleAndConflicts />
             <Route path="/Appointments" element={
               <ProtectedRoute allowedTypes={["doctor"]}>
                  <Appointments />
