@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const protect = require('../middleware/authMiddleware');
+
 const {
 	addGrade,
 	getStudentsForSession,
@@ -8,9 +8,9 @@ const {
 	getPerformanceAnalytics
 } = require('../controllers/performanceController');
 
-router.post('/add-grade', protect, addGrade);
-router.get('/players', protect, getPerformancePlayers);
-router.get('/analytics', protect, getPerformanceAnalytics);
-router.get('/students/:sessionId', protect, getStudentsForSession);
+router.post('/add-grade', addGrade);
+router.get('/players',  getPerformancePlayers);
+router.get('/analytics',  getPerformanceAnalytics);
+router.get('/students/:sessionId',  getStudentsForSession);
 
 module.exports = router;

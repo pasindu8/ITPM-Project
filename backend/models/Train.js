@@ -28,10 +28,10 @@ const SessionSchema = new mongoose.Schema({
     description: { 
         type: String 
     },
-    coachId: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User', 
-        required: true 
+    coachId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            default: null
     },
     status: { 
         type: String, 
