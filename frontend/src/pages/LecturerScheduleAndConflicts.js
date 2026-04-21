@@ -174,24 +174,17 @@ const LecturerScheduleAndConflicts = () => {
               <div>
                 <label className="block text-sm font-semibold text-white/80 mb-2 flex items-center gap-1.5"><CalendarIcon size={16}/> Date</label>
                 <input
-                  type="date" required
+                  type="date"
+                  required
                   className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white outline-none"
                   value={scheduleData.date}
                   min={new Date().toISOString().split('T')[0]}
                   max={new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]}
-                <input 
-                  type="date" required
-                  className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white outline-none"
-                  value={scheduleData.date}
-                  onChange={(e) => setScheduleData({...scheduleData, date: e.target.value})}
+                  onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
                   style={{ colorScheme: 'dark' }}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-white/80 mb-2 flex items-center gap-1.5"><Clock size={16}/> Start Time</label>
-                <input
-              
               <div>
                 <label className="block text-sm font-semibold text-white/80 mb-2 flex items-center gap-1.5"><Clock size={16}/> Start Time</label>
                 <input 
