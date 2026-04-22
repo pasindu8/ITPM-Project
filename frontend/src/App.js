@@ -50,12 +50,6 @@ import FollowUpTracker from "./pages/FollowUpTracker.js";
 import TreatmentLog from "./pages/TreatmentLog.js";
 import EmergencyReferrals from "./pages/EmergencyReferrals.js";
 
-import LecturerDashboard from "./pages/LecturerDashboard.js";
-import SubjectManagement from "./pages/SubjectManagement.js";
-import CourseMaterials from "./pages/CourseMaterials.js";
-import StudentMarks from "./pages/StudentMarks.js";
-import LecturerScheduleAndConflicts from "./pages/LecturerScheduleAndConflicts.js";
-
 import React, { useEffect, useState } from 'react';
 
 // Title එක වෙනස් කරන Logic එක මෙතන තියෙන්නේ

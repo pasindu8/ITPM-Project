@@ -136,9 +136,6 @@ const resolveConflict = asyncHandler(async (req, res) => {
 
     const session = await Train.findById(id);
 
-
-    const session = await Train.findById(req.params.id);
-
     if (!session) {
         return res.status(404).json({
             message: "Session not found"
@@ -151,16 +148,6 @@ const resolveConflict = asyncHandler(async (req, res) => {
         await session.save();
 
         return res.status(200).json({ message: "Conflict resolved" });
-
-
-        res.status(200).json({
-            message: "Conflict resolved"
-        });
-    } else {
-        res.status(200).json({
-            message: "Reschedule required"
-        });
-
     }
 
     if (action === "reschedule") {

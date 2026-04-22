@@ -15,27 +15,42 @@ function MatchHistory() {
 
   // Fetch all match results
   const fetchMatchResults = async () => {
-    try {
+    const loadMatches = async (attempt = 1) => {
+      try {
       setLoading(true);
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Please log in again');
+      }
       const response = await fetch('http://localhost:5000/matchresult/all', {
         headers: {
           'Authorization': `${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
-      const data = await response.json();
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.message || `Request failed (${response.status})`);
+      }
       if (data.success) {
         setMatches(data.data);
         setStats(data.stats);
+      } else {
+        throw new Error(data.message || 'Failed to load match results');
       }
-    } catch (error) {
-      console.error('Error fetching match results:', error);
-      Swal.fire('Error', 'Failed to load match results', 'error');
-    } finally {
-      setLoading(false);
-    }
+      } catch (error) {
+        if (attempt < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          return loadMatches(attempt + 1);
+        }
+        console.error('Error fetching match results:', error);
+        Swal.fire('Error', error.message || 'Failed to load match results', 'error');
+      } finally {
+        if (attempt === 1) setLoading(false);
+      }
+    };
+    return loadMatches();
   };
 
   useEffect(() => {
