@@ -13,12 +13,17 @@ const InventoryRoutes = require('./routes/InventoryRoutes');
 const trainingDrillRoutes = require('./routes/trainingDrillRoutes');
 const matchResultRoutes = require('./routes/matchResultRoutes');
 const performanceRoutes = require('./routes/performanceRoutes');
-const doctorRoutes = require('./routes/doctorRoutes');
 const lecturerRoutes = require('./routes/lecturerRoutes');
+const doctorRoutes = require('./routes/doctorRoutes');
+
+const lecturerRoutes = require('./routes/lecturerRoutes');
+
+const timetableRoutes = require('./routes/timetableRoutes');
+const studentGlobalRoutes = require('./routes/studentGlobalRoutes');
+
 const cors = require("cors");
-
-
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -35,8 +40,14 @@ app.use('/inventory', InventoryRoutes);
 app.use('/drills', trainingDrillRoutes);
 app.use('/matchresult', matchResultRoutes);
 app.use('/performance', performanceRoutes);
-app.use('/auth', doctorRoutes);
 app.use('/lecturer', lecturerRoutes);
+app.use('/auth', doctorRoutes);
+
+app.use('/lecturer', lecturerRoutes);
+
+app.use('/api/timetable', timetableRoutes);
+app.use('/api/student', studentGlobalRoutes);
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

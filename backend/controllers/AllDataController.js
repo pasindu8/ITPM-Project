@@ -19,13 +19,15 @@ const getSessionDateTime = (session) => {
     return sessionDate;
 };
 
-
 const getDashboardData = asyncHandler(async (req, res) => {
     
-    const user = await User.findById(req.user.id);
+    // 🔥 SAFE USER ID (WORKS WITH OR WITHOUT JWT)
+    const userId = req.user?.id || null;
 
-    const coach = await Coach.findOne({ userId : req.user.id }); // Coach collection එකෙන් userId එකට ගැලපෙන coach එක හොයාගන්න
-
+    let user = null;
+    let coach = null;
+    let coachSport = null;
+  
     const coachSport = coach ? coach.sport : null;
     const now = new Date();
     const todayStart = new Date();
@@ -42,12 +44,28 @@ const getDashboardData = asyncHandler(async (req, res) => {
     const nextSession = upcomingSessions.find((session) => getSessionDateTime(session) >= now) || null;
 
 
+=======
+    // 🔥 Only fetch if user exists
+    if (userId) {
+        user = await User.findById(userId);
+        coach = await Coach.findOne({ userId });
+        coachSport = coach ? coach.sport : null;
+    }
+
+    const [studentCount, recentMatches, equipmentCount, alertDash] = await Promise.all([
+        Student.countDocuments(coachSport ? { sport: coachSport } : {}),
+        Match.find(coachSport ? { sport: coachSport } : {}).sort({ date: -1 }).limit(5),
+        Equipment.countDocuments(coachSport ? { sport: coachSport } : {}),
+        Alert.find({}).sort({ dateAndTime: -1 }).limit(5)
+    ]);
+
     res.status(200).json({
         success: true,
         data: {
             students: studentCount,
             matches: recentMatches,
             equipment: equipmentCount,
+
             name: user.name, // ලොග් වෙලා ඉන්න යූසර්ගේ නම
             id: user._id,
             alerts: alertDash,
@@ -63,6 +81,9 @@ const getDashboardData = asyncHandler(async (req, res) => {
                     status: nextSession.status
                 }
                 : null
+            name: user?.name || "Guest",   // 🔥 safe fallback
+            id: user?._id || null,         // 🔥 safe fallback
+            alerts: alertDash
         }
     });
 });

@@ -32,6 +32,11 @@ import MatchScouter from "./pages/MatchScouter.js";
 import MatchSummary from "./pages/MatchSummary.js";
 import NextRegisterCoach from "./pages/NextRegisterCoach.js";
 import GradeSession from "./pages/GradeSession.js";
+import LecturerDashboard from "./pages/LecturerDashboard.js";
+import SubjectManagement from "./pages/SubjectManagement.js";
+import CourseMaterials from "./pages/CourseMaterials.js";
+import StudentMarks from "./pages/StudentMarks.js";
+import LecturerScheduleAndConflicts from "./pages/LecturerScheduleAndConflicts.js";
 import { getStoredToken, isTokenValid, clearAuthStorage } from "./utils/auth";
 
 import Appointments from "./pages/Appointments.js";
@@ -76,6 +81,13 @@ const TitleUpdater = () => {
       '/Appointments': 'SmartSport | Appointments',
       '/Injuryreports': 'SmartSport | Injury Reports',
       '/Recoveryplans': 'SmartSport | Recovery Plans',
+
+      '/LecturerDashboard': 'SmartSport | Lecturer Dashboard',
+      '/SubjectManagement': 'SmartSport | Subject Management',
+      '/CourseMaterials': 'SmartSport | Course Materials',
+      '/StudentMarks': 'SmartSport | Student Marks',
+      '/LecturerScheduleAndConflicts': 'SmartSport | Lecturer Schedule',
+
       '/MedicalProfile': 'SmartSport | Medical Profiles',
       '/MedicalClearance': 'SmartSport | Medical Clearance',
       '/FollowupTracker': 'SmartSport | Follow-Up Tracker',
@@ -83,81 +95,57 @@ const TitleUpdater = () => {
       '/EmergencyReferrals': 'SmartSport | Emergency Referrals',
     };
 
-    // මෙතනදී titles[location.pathname] හරියටම ගැලපෙන්න ඕනේ (Capital/Small letters සහා)
     document.title = titles[location.pathname] || 'SmartSport';
   }, [location]);
 
   return null; 
 };
 
-// 2. ලොග් වෙලා නැති අයට සහ අදාළ type එක නැති අයට යන්න බැරි වෙන්න හදන කෝඩ් එක (Protected Route)
 const ProtectedRoute = ({ children, allowedTypes }) => {
   const token = getStoredToken();
   const isAuthenticated = isTokenValid(token);
   const type = localStorage.getItem("type"); 
 
-  // 1. ලොග් වෙලා නැත්නම් කෙලින්ම Login යවනවා
   if (!isAuthenticated) {
     clearAuthStorage();
     return <Navigate to="/login" replace />; 
   }
 
-  // 2. අදාළ පේජ් එකට යන්න මේ type එකට අවසර නැත්නම් (Unauthorized)
   if (allowedTypes && !allowedTypes.includes(type)) {
-    // එයාව එයාගේ අදාළ Dashboard එකට ආපහු හරවලා යවනවා
     if (type === "user") return <Navigate to="/Dashboard" />;
     if (type === "coach") return <Navigate to="/CoachDashboard" />;
     if (type === "doctor") return <Navigate to="/DoctorDashboard" />;
     if (type === "lecturer") return <Navigate to="/LecturerDashboard" />;
     
-    return <Navigate to="/" />; // වෙන මුකුත් නැත්නම් Home එකට යවනවා
+    return <Navigate to="/" />;
   }
 
-  // 3. ලොග් වෙලත් ඉන්නවා, අවසරත් තියෙනවා නම් පේජ් එක පෙන්වනවා
   return children;
 };
 
 const PublicRoute = ({ children }) => {
-
-  // මෙතන "token" වෙනුවට ඔයා ලොග් වුණාම localStorage එකේ සේව් කරන නම දාන්න (උදා: "user")
-
   const token = getStoredToken();
   const isAuthenticated = isTokenValid(token);
-
   const types = localStorage.getItem("type");
 
   if (!isAuthenticated && token) {
     clearAuthStorage();
   }
 
- 
-
   if (isAuthenticated && (types === "user")) {
-
-    return <Navigate to="/Dashboard" />; // ලොග් වෙලා නම් කෙලින්ම Dashboard යවනවා
-
+    return <Navigate to="/Dashboard" />;
   }
-
-    else if (isAuthenticated && (types === "coach")) {
-
-    return <Navigate to="/CoachDashboard" />; // ලොග් වෙලා නම් කෙලින්ම CoachDashboard යවනවා
-
+  else if (isAuthenticated && (types === "coach")) {
+    return <Navigate to="/CoachDashboard" />;
   }
-
-    else if (isAuthenticated && (types === "doctor")) {
-
-    return <Navigate to="/DoctorDashboard" />; // ලොග් වෙලා නම් කෙලින්ම DoctorDashboard යවනවා
-
+  else if (isAuthenticated && (types === "doctor")) {
+    return <Navigate to="/DoctorDashboard" />;
   }
-
-    else if (isAuthenticated && (types === "lecturer")) {
-
-    return <Navigate to="/LecturerDashboard" />; // ලොග් වෙලා නම් කෙලින්ම LecturerDashboard යවනවා
-
+  else if (isAuthenticated && (types === "lecturer")) {
+    return <Navigate to="/LecturerDashboard" />;
   }
 
   return children;
-
 };
 
 function App() {
@@ -165,6 +153,9 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
+  const isDashboard = location.pathname === "/Dashboard"; //  CHANGED: Only Dashboard.js page
+
+  const hideHeaderFooter = isHomePage || isDashboard; //  CHANGED: Hide on Home and Dashboard only
 
   useEffect(() => {
     const publicPaths = [
@@ -217,7 +208,7 @@ function App() {
       ) : (
         <div id="myDiv">
           <TitleUpdater />
-          {!isHomePage && <Header />}
+          {!hideHeaderFooter && <Header />} {/*  CHANGED */}
 
           <Routes>
             <Route path="/" element={<Home />} />
@@ -342,9 +333,6 @@ function App() {
                  <GradeSession />
               </ProtectedRoute>
             } />
-
-
-
             <Route path="/Appointments" element={
               <ProtectedRoute allowedTypes={["doctor"]}>
                  <Appointments />
@@ -423,7 +411,8 @@ function App() {
               </ProtectedRoute>
             } />
           </Routes>
-          {!isHomePage && <Footer />}
+
+          {!hideHeaderFooter && <Footer />} {/* ✅ CHANGED */}
         </div>
       )}
     </div>

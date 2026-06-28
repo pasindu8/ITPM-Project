@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import logoMain from "../assets/logo1v3.png";
 
-const SmartSportLoader = () => {
+const SmartSportLoader = ({ autoHide = true }) => {
   const messages = [
     'Loading scores...',
     'Fetching live matches...',
@@ -13,7 +13,18 @@ const SmartSportLoader = () => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // 1. Text එක මාරු කරන Logic එක
+    // autoHide false නම් data load වෙනකම් loader screen එක පෙන්වයි.
+    if (!autoHide) {
+      setIsVisible(true);
+      const interval = setInterval(() => {
+        setMessageIndex((prev) => (prev + 1) % messages.length);
+      }, 900);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }
+
     let idx = 0;
     const interval = setInterval(() => {
       idx++;
@@ -24,7 +35,6 @@ const SmartSportLoader = () => {
       }
     }, 900);
 
-    // 2. තත්පර 3.6කට පස්සේ Loader එක Fade out වෙනවා
     const fadeTimer = setTimeout(() => {
       setIsVisible(false);
     }, 3000);
@@ -33,7 +43,7 @@ const SmartSportLoader = () => {
       clearInterval(interval);
       clearTimeout(fadeTimer);
     };
-  }, []);
+  }, [autoHide, messages.length]);
 
   return (
     <>
