@@ -45,6 +45,12 @@ import FollowUpTracker from "./pages/FollowUpTracker.js";
 import TreatmentLog from "./pages/TreatmentLog.js";
 import EmergencyReferrals from "./pages/EmergencyReferrals.js";
 
+import LecturerDashboard from "./pages/LecturerDashboard.js";
+import SubjectManagement from "./pages/SubjectManagement.js";
+import CourseMaterials from "./pages/CourseMaterials.js";
+import StudentMarks from "./pages/StudentMarks.js";
+import LecturerScheduleAndConflicts from "./pages/LecturerScheduleAndConflicts.js";
+
 import React, { useEffect, useState } from 'react';
 
 // Title එක වෙනස් කරන Logic එක මෙතන තියෙන්නේ
@@ -65,11 +71,16 @@ const TitleUpdater = () => {
       '/QrAttendance': 'SmartSport | Attendance',
       '/PerformanceAnalytics': 'SmartSport | Analytics',
       '/MatchHistory': 'SmartSport | Match Records',
+
+      '/DoctorDashboard': 'SmartSport | Doctor Dashboard',
+      '/Appointments': 'SmartSport | Appointments',
+      '/Injuryreports': 'SmartSport | Injury Reports',
+      '/Recoveryplans': 'SmartSport | Recovery Plans',
       '/MedicalProfile': 'SmartSport | Medical Profiles',
       '/MedicalClearance': 'SmartSport | Medical Clearance',
       '/FollowupTracker': 'SmartSport | Follow-Up Tracker',
       '/TreatmentLog': 'SmartSport | Treatment Log',
-      '/EmergencyReferrals': 'SmartSport | Emergency Referrals'
+      '/EmergencyReferrals': 'SmartSport | Emergency Referrals',
     };
 
     // මෙතනදී titles[location.pathname] හරියටම ගැලපෙන්න ඕනේ (Capital/Small letters සහා)
@@ -382,6 +393,33 @@ function App() {
             <Route path="/EmergencyReferrals" element={
               <ProtectedRoute allowedTypes={["doctor"]}>
                  <EmergencyReferrals />
+              </ProtectedRoute>
+            } />
+            
+
+            <Route path="/LecturerDashboard" element={
+              <ProtectedRoute allowedTypes={["lecturer"]}>
+                <LecturerDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/SubjectManagement" element={
+              <ProtectedRoute allowedTypes={["lecturer"]}>
+                <SubjectManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/CourseMaterials" element={
+              <ProtectedRoute allowedTypes={["lecturer"]}>
+                <CourseMaterials />
+              </ProtectedRoute>
+            } />
+            <Route path="/StudentMarks" element={
+              <ProtectedRoute allowedTypes={["lecturer"]}>
+                <StudentMarks />
+              </ProtectedRoute>
+            } />
+            <Route path="/LecturerScheduleAndConflicts" element={
+              <ProtectedRoute allowedTypes={["lecturer"]}>
+                <LecturerScheduleAndConflicts />
               </ProtectedRoute>
             } />
           </Routes>

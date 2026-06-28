@@ -3,26 +3,85 @@ import bgImage from '../assets/6903344.jpg';
 import DoctorSidebar from '../components/DoctorSidebar';
 
 
+const VALID_TYPES = ['Review', 'Therapy', 'Medication'];
+
 
 function TreatmentLog() {
   const [logs, setLogs] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ student: '', date: '', note: '', type: 'Review' });
+  const [form, setForm] = useState({ student: '', studentId: '', date: '', note: '', type: 'Review' });
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
 
-  // Fetch all treatment logs on mount
+  const setField = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: '' }));
+    setSubmitError('');
+  };
+
+  const validateForm = () => {
+    const nextErrors = {};
+    const today = new Date().toISOString().split('T')[0];
+
+    if (!form.studentId) {
+      nextErrors.studentId = 'Please select a student';
+    }
+
+    if (!form.date) {
+      nextErrors.date = 'Date is required';
+    } else if (form.date > today) {
+      nextErrors.date = 'Date cannot be in the future';
+    }
+
+    const trimmedNote = form.note.trim();
+    if (!trimmedNote) {
+      nextErrors.note = 'Treatment note is required';
+    } else if (trimmedNote.length < 3) {
+      nextErrors.note = 'Treatment note must be at least 3 characters';
+    } else if (trimmedNote.length > 1000) {
+      nextErrors.note = 'Treatment note is too long (max 1000 characters)';
+    }
+
+    if (!VALID_TYPES.includes(form.type)) {
+      nextErrors.type = 'Invalid treatment type';
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  // Fetch logs and available student list on mount
   useEffect(() => {
-    const fetchLogs = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5000/auth/treatment-logs', {
-          headers: { 'Content-Type': 'application/json', Authorization: `${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
+        const [logsRes, studentsRes] = await Promise.all([
+          fetch('http://localhost:5000/auth/treatment-logs', {
+            headers: { 'Content-Type': 'application/json', Authorization: `${token}` },
+          }),
+          fetch('http://localhost:5000/auth/medical-profiles', {
+            headers: { 'Content-Type': 'application/json', Authorization: `${token}` },
+          }),
+        ]);
+
+        if (logsRes.ok) {
+          const data = await logsRes.json();
           setLogs(data);
         } else {
-          console.error("Failed to fetch treatment logs");
+          console.error('Failed to fetch treatment logs');
+        }
+
+        if (studentsRes.ok) {
+          const profiles = await studentsRes.json();
+          const options = (profiles || [])
+            .filter((p) => p?.id && p?.name)
+            .map((p) => ({ id: p.id, name: p.name }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+          setStudents(options);
+        } else {
+          console.error('Failed to fetch students for treatment log');
         }
       } catch (err) {
         console.error(err);
@@ -30,18 +89,28 @@ function TreatmentLog() {
         setLoading(false);
       }
     };
-    fetchLogs();
+
+    fetchData();
   }, []);
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!form.student || !form.date || !form.note) return;
+    if (!validateForm()) return;
 
     setSubmitting(true);
+    setSubmitError('');
+
+    const payload = {
+      student: form.student,
+      studentId: form.studentId,
+      date: form.date,
+      type: form.type,
+      note: form.note.trim(),
+    };
 
     // Optimistic UI — add to top of list immediately
     const tempId = `temp-${Date.now()}`;
-    const localEntry = { _id: tempId, ...form };
+    const localEntry = { _id: tempId, ...payload };
     setLogs((prev) => [localEntry, ...prev]);
 
     try {
@@ -49,19 +118,25 @@ function TreatmentLog() {
       const res = await fetch('http://localhost:5000/auth/treatment-logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `${token}` },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
-        const saved = await res.json();
-        // Replace temp entry with real saved one
-        setLogs((prev) => prev.map((l) => (l._id === tempId ? saved : l)));
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || 'Failed to save treatment log');
       }
-    } catch {
-      // Keep the optimistic entry even if request fails
+
+      const saved = await res.json();
+      // Replace temp entry with real saved one
+      setLogs((prev) => prev.map((l) => (l._id === tempId ? saved : l)));
+      setForm({ student: '', studentId: '', date: '', note: '', type: 'Review' });
+      setErrors({});
+    } catch (error) {
+      // Roll back optimistic entry on failure
+      setLogs((prev) => prev.filter((l) => l._id !== tempId));
+      setSubmitError(error.message || 'Failed to save treatment log');
     } finally {
       setSubmitting(false);
-      setForm({ student: '', date: '', note: '', type: 'Review' });
     }
   };
 
@@ -89,41 +164,67 @@ function TreatmentLog() {
           onSubmit={onSubmit}
           className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-5 shadow-xl grid grid-cols-1 md:grid-cols-2 gap-3"
         >
-          <input
-            value={form.student}
-            onChange={(e) => setForm({ ...form, student: e.target.value })}
-            placeholder="Student name"
-            className="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white placeholder-white/40 focus:outline-none focus:border-blue-400"
-          />
+          <div>
+            <select
+              value={form.studentId}
+              onChange={(e) => {
+                const selected = students.find((s) => s.id === e.target.value);
+                setField('studentId', e.target.value);
+                setField('student', selected ? selected.name : '');
+              }}
+              className="w-full bg-gray-800 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-400"
+            >
+              <option value="">Select student</option>
+              {students.map((s) => (
+                <option key={s.id} value={s.id}>{s.name} ({s.id})</option>
+              ))}
+            </select>
+            {errors.studentId && <p className="text-red-400 text-xs mt-1">{errors.studentId}</p>}
+          </div>
+
           <input
             type="date"
             value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
+            onChange={(e) => setField('date', e.target.value)}
+            max={new Date().toISOString().split('T')[0]}
             className="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-400"
           />
-          <select
-            value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value })}
-            className="bg-gray-800 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-400"
-          >
-            <option value="Review">Review</option>
-            <option value="Therapy">Therapy</option>
-            <option value="Medication">Medication</option>
-          </select>
+          {errors.date && <p className="md:col-span-2 text-red-400 text-xs -mt-2">{errors.date}</p>}
+
+          <div>
+            <select
+              value={form.type}
+              onChange={(e) => setField('type', e.target.value)}
+              className="w-full bg-gray-800 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-400"
+            >
+              <option value="Review">Review</option>
+              <option value="Therapy">Therapy</option>
+              <option value="Medication">Medication</option>
+            </select>
+            {errors.type && <p className="text-red-400 text-xs mt-1">{errors.type}</p>}
+          </div>
+
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || students.length === 0}
             className="bg-blue-500 hover:bg-blue-400 rounded-xl px-4 py-2.5 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {submitting ? '⏳ Saving...' : '+ Add Log Entry'}
           </button>
+
           <textarea
             value={form.note}
-            onChange={(e) => setForm({ ...form, note: e.target.value })}
+            onChange={(e) => setField('note', e.target.value)}
             placeholder="Treatment note"
             rows={3}
+            maxLength={1000}
             className="md:col-span-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white placeholder-white/40 focus:outline-none focus:border-blue-400 resize-none"
           />
+          {errors.note && <p className="md:col-span-2 text-red-400 text-xs -mt-2">{errors.note}</p>}
+          {submitError && <p className="md:col-span-2 text-red-400 text-sm">{submitError}</p>}
+          {students.length === 0 && (
+            <p className="md:col-span-2 text-amber-300 text-sm">No students available to log treatment at the moment.</p>
+          )}
         </form>
 
         {/* Log entries */}
@@ -142,7 +243,10 @@ function TreatmentLog() {
               {logs.map((log) => (
                 <div key={log._id} className="bg-white/5 border border-white/10 rounded-xl p-3 hover:bg-white/10 transition-all">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
-                    <p className="text-white font-semibold">{log.student}</p>
+                    <div>
+                      <p className="text-white font-semibold">{log.student}</p>
+                      {log.studentId && <p className="text-white/40 text-xs">{log.studentId}</p>}
+                    </div>
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${typeColor[log.type] || typeColor.Review}`}>
                         {log.type}

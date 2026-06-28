@@ -85,7 +85,13 @@ const getSessions = asyncHandler(async (req, res) => {
 // @desc    Manage Conflict
 const resolveConflict = asyncHandler(async (req, res) => {
     const { action } = req.body;
-    const session = await Train.findById(req.params.id);
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ message: 'Session ID is required' });
+    }
+
+    const session = await Train.findById(id);
 
     if (!session) {
         return res.status(404).json({ message: "Session not found" });
@@ -95,10 +101,14 @@ const resolveConflict = asyncHandler(async (req, res) => {
         session.status = "All Clear";
         session.conflicts = [];
         await session.save();
-        res.status(200).json({ message: "Conflict resolved" });
-    } else {
-        res.status(200).json({ message: "Reschedule required" });
+        return res.status(200).json({ message: "Conflict resolved" });
     }
+
+    if (action === "reschedule") {
+        return res.status(200).json({ message: "Please reschedule this session", requiresReschedule: true });
+    }
+
+    return res.status(400).json({ message: 'Invalid conflict action' });
 });
 
 module.exports = { addSession, getSessions, resolveConflict };

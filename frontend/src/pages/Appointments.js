@@ -39,6 +39,8 @@ function RescheduleModal({ appt, onClose, onSave }) {
             <div>
               <label className="text-white/70 text-sm mb-1 block">New Date</label>
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required
+                min={new Date().toISOString().split('T')[0]} 
+                max={new Date(new Date().setMonth(new Date().getMonth() + 2)).toISOString().split('T')[0]}
                 className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-blue-400" />
             </div>
             <div>
@@ -49,7 +51,7 @@ function RescheduleModal({ appt, onClose, onSave }) {
           </div>
           <div>
             <label className="text-white/70 text-sm mb-1 block">Update Notes</label>
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Optional notes..."
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Optional notes..." required
               className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:border-blue-400 resize-none" />
           </div>
           <div className="flex gap-3 pt-2">

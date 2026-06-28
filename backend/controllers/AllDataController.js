@@ -10,6 +10,14 @@ const Match = require('../models/Match');
 const Equipment = require('../models/Equipment'); 
 const Coach = require('../models/Coach');
 const Alert = require('../models/Alert');
+const Train = require('../models/Train');
+
+const getSessionDateTime = (session) => {
+    const sessionDate = new Date(session.date);
+    const [hours = '0', minutes = '0'] = (session.startTime || '').split(':');
+    sessionDate.setHours(Number(hours), Number(minutes), 0, 0);
+    return sessionDate;
+};
 
 
 const getDashboardData = asyncHandler(async (req, res) => {
@@ -19,13 +27,19 @@ const getDashboardData = asyncHandler(async (req, res) => {
     const coach = await Coach.findOne({ userId : req.user.id }); // Coach collection එකෙන් userId එකට ගැලපෙන coach එක හොයාගන්න
 
     const coachSport = coach ? coach.sport : null;
+    const now = new Date();
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
 
-    const [studentCount, recentMatches, equipmentCount, alertDash] = await Promise.all([
+    const [studentCount, recentMatches, equipmentCount, alertDash, upcomingSessions] = await Promise.all([
         Student.countDocuments(coachSport ? { sport: coachSport } : {}), // If coachSport is defined, filter by sport, otherwise count all students
         Match.find(coachSport ? { sport: coachSport } : {}).sort({ date: -1 }).limit(5),// If coachSport is defined, filter by sport, otherwise get all matches
         Equipment.countDocuments(coachSport ? { sport: coachSport } : {}), // If coachSport is defined, filter by sport, otherwise count all equipment
-        Alert.find({}).sort({ dateAndTime: -1 }).limit(5)
+        Alert.find({}).sort({ dateAndTime: -1 }).limit(5),
+        Train.find({ coachId: req.user.id, date: { $gte: todayStart } }).sort({ date: 1, startTime: 1 }).limit(20).lean()
     ]);
+
+    const nextSession = upcomingSessions.find((session) => getSessionDateTime(session) >= now) || null;
 
 
     res.status(200).json({
@@ -36,7 +50,19 @@ const getDashboardData = asyncHandler(async (req, res) => {
             equipment: equipmentCount,
             name: user.name, // ලොග් වෙලා ඉන්න යූසර්ගේ නම
             id: user._id,
-            alerts: alertDash
+            alerts: alertDash,
+            nextSession: nextSession
+                ? {
+                    id: nextSession._id,
+                    sessionName: nextSession.sessionName,
+                    date: nextSession.date,
+                    startTime: nextSession.startTime,
+                    endTime: nextSession.endTime,
+                    location: nextSession.location,
+                    team: nextSession.team,
+                    status: nextSession.status
+                }
+                : null
         }
     });
 });

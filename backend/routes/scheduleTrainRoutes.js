@@ -5,7 +5,7 @@ const protect = require('../middleware/authMiddleware');
 
 router.post('/add-session', protect, addSession);
 router.get('/get-sessions', protect, getSessions);
-router.post('/resolve-conflict', protect, resolveConflict);
+router.put('/resolve-conflict/:id', protect, resolveConflict);
 
 module.exports = router;
 

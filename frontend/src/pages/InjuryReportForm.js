@@ -42,6 +42,7 @@ function InjuryReportForm() {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const [form, setForm] = useState({
     // Step 1 — Injury Info
@@ -117,28 +118,39 @@ function InjuryReportForm() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    setSubmitError('');
     try {
       const token = localStorage.getItem('token');
-      const payload = {
-        studentName: form.studentName,
-        studentId: form.studentId,
-        sportType: form.sportType,
-        injuryType: form.injuryType,
-        injuryLocation: form.injuryLocation,
-        dateOfInjury: form.dateOfInjury,
-        medicalDocument: form.medicalDocument?.name || '',
-        status: 'Under Treatment',
-        recoveryStage: 'Injured',
-      };
+      const payload = new FormData();
+      payload.append('studentName', form.studentName);
+      payload.append('studentId', form.studentId);
+      payload.append('sportType', form.sportType);
+      payload.append('injuryType', form.injuryType);
+      payload.append('injuryLocation', form.injuryLocation);
+      payload.append('dateOfInjury', form.dateOfInjury);
+      payload.append('status', 'Under Treatment');
+      payload.append('recoveryStage', 'Injured');
+
+      if (form.medicalDocument) {
+        payload.append('medicalDocument', form.medicalDocument);
+      }
+
       const res = await fetch('http://localhost:5000/auth/injuries', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `${token}` },
-        body: JSON.stringify(payload),
+        headers: { 'Authorization': `${token}` },
+        body: payload,
       });
-      // Even if backend fails, we show success for demo
-    } catch {}
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to submit injury report');
+      }
+
+      setSubmitted(true);
+    } catch (error) {
+      setSubmitError(error.message || 'Failed to submit injury report');
+    }
     setSubmitting(false);
-    setSubmitted(true);
   };
 
   if (submitted) {
@@ -249,6 +261,7 @@ function InjuryReportForm() {
                   <input
                     type="date"
                     value={form.dateOfInjury}
+                    min={new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0]} 
                     max={new Date().toISOString().split('T')[0]}
                     onChange={(e) => set('dateOfInjury', e.target.value)}
                     className={inputClass}
@@ -420,6 +433,10 @@ function InjuryReportForm() {
               </button>
             )}
           </div>
+
+          {submitError && (
+            <p className="text-red-400 text-sm mt-3 text-center">{submitError}</p>
+          )}
         </div>
 
         {/* Bottom note */}

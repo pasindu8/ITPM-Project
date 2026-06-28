@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import bgImage from '../assets/6903344.jpg';
 import Sidebar from '../components/Sidebar.js';
 import TimeAgo from 'timeago-react';
@@ -7,9 +7,47 @@ import Loader from "../components/Loader.js";
 
 
 function CoachDashboard() {
-    const [setUser] = useState(null);
+    const navigate = useNavigate();
+    const [, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [dashboardData, setDashboardData] = useState(null);
+
+    const isWithinLastMonth = (dateValue) => {
+        const alertDate = new Date(dateValue);
+
+        if (Number.isNaN(alertDate.getTime())) {
+            return false;
+        }
+
+        const now = new Date();
+        const oneMonthAgo = new Date(now);
+        oneMonthAgo.setMonth(now.getMonth() - 1);
+
+        return alertDate >= oneMonthAgo;
+    };
+
+    const recentAlerts = (dashboardData?.alerts || []).filter((alert) =>
+        isWithinLastMonth(alert.dateAndTime)
+    );
+
+    const nextSessionText = () => {
+        const nextSession = dashboardData?.nextSession;
+        if (!nextSession?.date || !nextSession?.startTime) {
+            return 'No upcoming session';
+        }
+
+        const sessionDate = new Date(nextSession.date);
+        if (Number.isNaN(sessionDate.getTime())) {
+            return `Upcoming, ${nextSession.startTime}`;
+        }
+
+        const dateLabel = sessionDate.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+        });
+
+        return `${dateLabel}, ${nextSession.startTime}`;
+    };
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -80,7 +118,8 @@ function CoachDashboard() {
                 </div>
                 <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 text-center shadow-xl transition-transform hover:scale-105">
                     <h3 className="text-white/70 uppercase text-sm font-bold tracking-widest mb-2">Next Session</h3>
-                    <h1 className="text-3xl font-black text-white mt-2">Today, 4:00 PM</h1>
+                    <h1 className="text-3xl font-black text-white mt-2">{nextSessionText()}</h1>
+                    <p className="text-white/70 mt-2 text-sm">{dashboardData?.nextSession?.sessionName || 'Schedule a session to see details'}</p>
                 </div>
                 </div>
 
@@ -95,12 +134,17 @@ function CoachDashboard() {
                         <strong className="text-white text-lg">⚠️ Schedule Conflict Detected</strong>
                         <p className="text-sm text-white/60 mt-1">3 students have lectures during tomorrow's practice.</p>
                     </div>
-                    <button className="px-6 py-2 bg-white text-blue-900 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg">View</button>
+                    <button
+                        onClick={() => navigate('/ScheduleAndConflicts')}
+                        className="px-6 py-2 bg-white text-blue-900 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg"
+                    >
+                        View
+                    </button>
                     </div>
 
                     {/* Success Alert */}
-                    {dashboardData?.alerts?.length > 0 ? (
-                        dashboardData.alerts.map((alert, index) => (
+                    {recentAlerts.length > 0 ? (
+                        recentAlerts.map((alert, index) => (
                         <div key={index} className="flex justify-between items-center p-5 bg-white/5 border-l-4 border-white rounded-2xl hover:bg-white/10 transition-all">
                         <div>
                             <strong className="text-white text-lg">📢 Message Sent</strong>

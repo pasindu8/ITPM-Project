@@ -1,4 +1,6 @@
 const asyncHandler = require('../middleware/asyncHandler');
+const fs = require('fs');
+const path = require('path');
 const InjuryReport = require('../models/InjuryReport');
 const MedicalClearance = require('../models/MedicalClearance');
 const TreatmentLog = require('../models/TreatmentLog');
@@ -33,6 +35,10 @@ const createInjury = asyncHandler(async (req, res) => {
         recoveryStage
     } = req.body;
 
+    const uploadedDocumentPath = req.file
+        ? `/uploads/injury-documents/${req.file.filename}`
+        : (medicalDocument || '');
+
     if (!studentName || !studentId || !sportType || !injuryType || !injuryLocation || !dateOfInjury) {
         res.status(400);
         throw new Error('Please provide all required fields');
@@ -45,7 +51,7 @@ const createInjury = asyncHandler(async (req, res) => {
         injuryType,
         injuryLocation,
         dateOfInjury,
-        medicalDocument: medicalDocument || '',
+        medicalDocument: uploadedDocumentPath,
         status: status || 'Under Treatment',
         recoveryStage: recoveryStage || 'Injured',
         submittedBy: req.user?.id || null
@@ -77,6 +83,12 @@ const updateInjury = asyncHandler(async (req, res) => {
     }
 
     const updatedFields = {
+        studentName:      req.body.studentName      ?? injury.studentName,
+        studentId:        req.body.studentId        ?? injury.studentId,
+        sportType:        req.body.sportType        ?? injury.sportType,
+        injuryType:       req.body.injuryType       ?? injury.injuryType,
+        injuryLocation:   req.body.injuryLocation   ?? injury.injuryLocation,
+        dateOfInjury:     req.body.dateOfInjury     ?? injury.dateOfInjury,
         status:           req.body.status          ?? injury.status,
         recoveryStage:    req.body.recoveryStage   ?? injury.recoveryStage,
         medicalNotes:     req.body.medicalNotes    ?? injury.medicalNotes,
@@ -96,6 +108,28 @@ const updateInjury = asyncHandler(async (req, res) => {
     );
 
     res.status(200).json(updated);
+});
+
+// @desc    Delete an injury report
+// @route   DELETE /auth/injuries/:id
+// @access  Private
+const deleteInjury = asyncHandler(async (req, res) => {
+    const injury = await InjuryReport.findById(req.params.id);
+
+    if (!injury) {
+        res.status(404);
+        throw new Error('Injury report not found');
+    }
+
+    if (injury.medicalDocument && injury.medicalDocument.startsWith('/uploads/')) {
+        const absoluteFilePath = path.join(__dirname, '..', injury.medicalDocument.replace(/^\//, ''));
+        if (fs.existsSync(absoluteFilePath)) {
+            fs.unlinkSync(absoluteFilePath);
+        }
+    }
+
+    await injury.deleteOne();
+    res.status(200).json({ success: true, message: 'Injury report removed' });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -239,17 +273,47 @@ const getTreatmentLogs = asyncHandler(async (req, res) => {
 const createTreatmentLog = asyncHandler(async (req, res) => {
     const { student, studentId, date, type, note, injuryReportId } = req.body;
 
-    if (!student || !date || !note) {
+    const normalizedStudent = String(student || '').trim();
+    const normalizedStudentId = String(studentId || '').trim();
+    const normalizedNote = String(note || '').trim();
+    const normalizedType = String(type || 'Review').trim();
+    const allowedTypes = ['Review', 'Therapy', 'Medication'];
+
+    if (!normalizedStudent || !normalizedStudentId || !date || !normalizedNote) {
         res.status(400);
-        throw new Error('Student, date, and note are required');
+        throw new Error('Student, student ID, date, and note are required');
+    }
+
+    if (!allowedTypes.includes(normalizedType)) {
+        res.status(400);
+        throw new Error('Invalid treatment type');
+    }
+
+    const parsedDate = new Date(date);
+    if (Number.isNaN(parsedDate.getTime())) {
+        res.status(400);
+        throw new Error('Invalid date format');
+    }
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    if (parsedDate > todayEnd) {
+        res.status(400);
+        throw new Error('Treatment date cannot be in the future');
+    }
+
+    const studentExists = await Student.findOne({ studentId: normalizedStudentId }).lean();
+    if (!studentExists) {
+        res.status(400);
+        throw new Error('Selected student was not found');
     }
 
     const log = await TreatmentLog.create({
-        student,
-        studentId: studentId || '',
+        student: normalizedStudent,
+        studentId: normalizedStudentId,
         date,
-        type:           type || 'Review',
-        note,
+        type:           normalizedType,
+        note:           normalizedNote,
         injuryReportId: injuryReportId || null,
         loggedBy:       req.user?.id || null
     });
@@ -336,6 +400,7 @@ module.exports = {
     getInjuries,
     createInjury,
     updateInjury,
+    deleteInjury,
     getDashboardStats,
     getMedicalClearances,
     updateMedicalClearance,
