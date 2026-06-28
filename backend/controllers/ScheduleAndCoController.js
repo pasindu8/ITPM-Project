@@ -6,7 +6,7 @@ const asyncHandler = require('../middleware/asyncHandler');
 // @desc    Add new training session with conflict check
 const addSession = asyncHandler(async (req, res) => {
 
-    // 🔥 SAFE BODY (prevents crash)
+
     const {
         sessionName,
         location,
@@ -17,7 +17,7 @@ const addSession = asyncHandler(async (req, res) => {
         description
     } = req.body || {};
 
-    // 🔥 SAFE USER (works with/without JWT)
+ 
     const userId = req.user?.id || null;
 
     if (!sessionName || !date || !startTime || !endTime || !team) {
@@ -27,22 +27,22 @@ const addSession = asyncHandler(async (req, res) => {
         });
     }
 
-    // 1️⃣ Get day name
+    
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const d = new Date(date);
     const dayName = days[d.getDay()];
 
-    // 2️⃣ Get students in that team
+    // 2️ Get students in that team
     const teamStudents = await Student.find({ sport: team });
     const studentGroups = [...new Set(teamStudents.map(s => s.group))];
 
-    // 3️⃣ Lecture conflicts
+    // 3️ Lecture conflicts
     const lectureConflicts = await Lecture.find({
         day: dayName,
         group: { $in: studentGroups }
     });
 
-    // 4️⃣ Training conflicts (SAFE — no crash if no JWT)
+    // 4️ Training conflicts (SAFE — no crash if no JWT)
     let trainingConflicts = [];
     if (userId) {
         trainingConflicts = await Train.find({
@@ -91,7 +91,7 @@ const addSession = asyncHandler(async (req, res) => {
         endTime,
         team,
         description,
-        coachId: userId || null, // 🔥 FIXED
+        coachId: userId || null, // FIXED
         status: sessionStatus,
         conflicts: foundConflicts
     });
@@ -113,7 +113,7 @@ const getSessions = asyncHandler(async (req, res) => {
     if (userId) {
         sessions = await Train.find({ coachId: userId }).sort({ date: 1 });
     } else {
-        sessions = await Train.find().sort({ date: 1 }); // 🔥 fallback
+        sessions = await Train.find().sort({ date: 1 }); // fallback
     }
 
     res.status(200).json({
@@ -128,6 +128,15 @@ const resolveConflict = asyncHandler(async (req, res) => {
 
     const { action } = req.body;
 
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ message: 'Session ID is required' });
+    }
+
+    const session = await Train.findById(id);
+
+
     const session = await Train.findById(req.params.id);
 
     if (!session) {
@@ -141,6 +150,9 @@ const resolveConflict = asyncHandler(async (req, res) => {
         session.conflicts = [];
         await session.save();
 
+        return res.status(200).json({ message: "Conflict resolved" });
+
+
         res.status(200).json({
             message: "Conflict resolved"
         });
@@ -148,7 +160,14 @@ const resolveConflict = asyncHandler(async (req, res) => {
         res.status(200).json({
             message: "Reschedule required"
         });
+
     }
+
+    if (action === "reschedule") {
+        return res.status(200).json({ message: "Please reschedule this session", requiresReschedule: true });
+    }
+
+    return res.status(400).json({ message: 'Invalid conflict action' });
 });
 
 module.exports = { addSession, getSessions, resolveConflict };

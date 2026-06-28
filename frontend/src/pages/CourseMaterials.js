@@ -343,8 +343,12 @@ const CourseMaterials = () => {
                 <div>
                    <label className="block text-sm font-semibold text-white/80 mb-2">Deadline / Schedule Date</label>
                    <input 
+
+                     type="date"
+
                      type="date" required
                      min={new Date().toISOString().split('T')[0]}
+
                      className="w-full p-3 rounded-xl bg-white/5 border border-white/20 text-white outline-none"
                      value={newUpload.deadline}
                      onChange={(e) => setNewUpload({...newUpload, deadline: e.target.value})}

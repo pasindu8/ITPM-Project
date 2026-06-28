@@ -291,6 +291,79 @@ const getProfile = asyncHandler(async (req, res) => {
     res.json(user);
 });
 
+const updateProfile = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    const name = String(req.body.name || '').trim();
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const username = String(req.body.username || '').trim();
+    const phoneNumber = String(req.body.phoneNumber || '').trim();
+
+    if (!name || !email || !username) {
+        res.status(400);
+        throw new Error('Name, email, and username are required');
+    }
+
+    if (name.length < 2 || name.length > 60) {
+        res.status(400);
+        throw new Error('Name must be between 2 and 60 characters');
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        res.status(400);
+        throw new Error('Please provide a valid email address');
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9._-]{3,20}$/;
+    if (!usernameRegex.test(username)) {
+        res.status(400);
+        throw new Error('Username must be 3-20 characters and contain only letters, numbers, dot, underscore, or hyphen');
+    }
+
+    if (phoneNumber) {
+        const phoneRegex = /^\+?[0-9]{10,15}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+            res.status(400);
+            throw new Error('Phone number must contain 10 to 15 digits and may start with +');
+        }
+    }
+
+    const emailExists = await User.findOne({ email, _id: { $ne: user._id } });
+    if (emailExists) {
+        res.status(400);
+        throw new Error('Email already exists');
+    }
+
+    const usernameExists = await User.findOne({ username, _id: { $ne: user._id } });
+    if (usernameExists) {
+        res.status(400);
+        throw new Error('Username already exists');
+    }
+
+    user.name = name;
+    user.email = email;
+    user.username = username;
+    user.phoneNumber = phoneNumber;
+
+    await user.save();
+
+    res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        phoneNumber: user.phoneNumber,
+        type: user.type,
+        status: user.status,
+    });
+});
+
 const phoneVerification = asyncHandler(async (req, res) => {
     const { phoneNumber } = req.body;
 
@@ -386,4 +459,4 @@ const CoachSport = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { registerUser, registerSTU, registerAdmin, login, getProfile, verifyUser, forgotPassword, phoneVerification, resendotp, CoachSport };
+module.exports = { registerUser, registerSTU, registerAdmin, login, getProfile, updateProfile, verifyUser, forgotPassword, phoneVerification, resendotp, CoachSport };

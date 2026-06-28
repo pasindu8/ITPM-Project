@@ -173,6 +173,17 @@ const LecturerScheduleAndConflicts = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white/5 p-6 rounded-2xl border border-white/10 mt-6">
               <div>
                 <label className="block text-sm font-semibold text-white/80 mb-2 flex items-center gap-1.5"><CalendarIcon size={16}/> Date</label>
+
+                <input 
+                  type="date" required
+                  className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white outline-none"
+                  value={scheduleData.date}
+                  onChange={(e) => setScheduleData({...scheduleData, date: e.target.value})}
+                  style={{ colorScheme: 'dark' }}
+                />
+              </div>
+              
+
                 <input
                   type="date"
                   required
@@ -184,6 +195,7 @@ const LecturerScheduleAndConflicts = () => {
                   style={{ colorScheme: 'dark' }}
                 />
               </div>
+
 
               <div>
                 <label className="block text-sm font-semibold text-white/80 mb-2 flex items-center gap-1.5"><Clock size={16}/> Start Time</label>

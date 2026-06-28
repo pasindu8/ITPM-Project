@@ -23,11 +23,71 @@ const renderStars = (score) => {
     return `${'★'.repeat(filled)}${'☆'.repeat(empty)}`;
 };
 
+function PlayerDetailModal({ player, onClose }) {
+    if (!player) {
+        return null;
+    }
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-lg bg-gray-900/95 border border-white/20 rounded-3xl p-6 shadow-2xl text-white">
+                <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-xl font-bold">Player Details</h3>
+                    <button onClick={onClose} className="text-white/60 hover:text-white text-2xl leading-none">✕</button>
+                </div>
+
+                <div className="space-y-3">
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+                        <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Name</p>
+                        <p className="text-lg font-semibold">{player.name}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+                            <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Registration No</p>
+                            <p className="font-medium">{player.registrationNumber || '—'}</p>
+                        </div>
+                        <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+                            <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Health Status</p>
+                            <p className="font-medium">{player.healthStatus || '—'}</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+                            <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Role</p>
+                            <p className="font-medium">{player.role || '—'}</p>
+                        </div>
+                        <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+                            <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Team</p>
+                            <p className="font-medium">{player.team || '—'}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+                        <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Performance</p>
+                        <p className="text-yellow-400 font-bold">{renderStars(player.averageScore)}</p>
+                        <p className="text-sm text-white/70 mt-1">{player.averageScore}/10 • {player.gradesCount} grades</p>
+                    </div>
+                </div>
+
+                <button
+                    onClick={onClose}
+                    className="w-full mt-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 font-semibold transition-all"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    );
+}
+
 function PlayerManagement() {
     const [players, setPlayers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [selectedPlayer, setSelectedPlayer] = useState(null);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -173,7 +233,10 @@ function PlayerManagement() {
                                     </span>
                                 </td>
                                 <td className="p-5 text-center">
-                                    <button className="px-4 py-2 bg-white text-blue-900 font-bold rounded-lg hover:bg-blue-50 transition-all transform active:scale-95 shadow-md">
+                                    <button
+                                        onClick={() => setSelectedPlayer(player)}
+                                        className="px-4 py-2 bg-white text-blue-900 font-bold rounded-lg hover:bg-blue-50 transition-all transform active:scale-95 shadow-md"
+                                    >
                                         View
                                     </button>
                                 </td>
@@ -185,6 +248,13 @@ function PlayerManagement() {
                     </div>
                 </div>
                 </div>
+
+                {selectedPlayer && (
+                    <PlayerDetailModal
+                        player={selectedPlayer}
+                        onClose={() => setSelectedPlayer(null)}
+                    />
+                )}
 
         </div>
     );

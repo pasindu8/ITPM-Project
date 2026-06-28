@@ -15,8 +15,12 @@ const matchResultRoutes = require('./routes/matchResultRoutes');
 const performanceRoutes = require('./routes/performanceRoutes');
 const lecturerRoutes = require('./routes/lecturerRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
+
+const lecturerRoutes = require('./routes/lecturerRoutes');
+
 const timetableRoutes = require('./routes/timetableRoutes');
 const studentGlobalRoutes = require('./routes/studentGlobalRoutes');
+
 const cors = require("cors");
 const app = express();
 
@@ -38,8 +42,12 @@ app.use('/matchresult', matchResultRoutes);
 app.use('/performance', performanceRoutes);
 app.use('/lecturer', lecturerRoutes);
 app.use('/auth', doctorRoutes);
+
+app.use('/lecturer', lecturerRoutes);
+
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/student', studentGlobalRoutes);
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

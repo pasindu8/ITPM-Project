@@ -9,11 +9,48 @@ import Swal from 'sweetalert2';
 function ScheduleAndConflicts() {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
-    const [selectedSession, setSelectedSession] = useState(null);
-    const [conflicts, sets] = useState([]); // දත්ත ගබඩා කිරීමට
     const [sessions, setSessions] = useState([]); // දත්ත ගබඩා කිරීමට
     const [loading, setLoading] = useState(true);
+
+    const getCurrentMonthKey = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        return `${year}-${month}`;
+    };
+
+    const [monthFilter, setMonthFilter] = useState(getCurrentMonthKey());
+
+    const getMonthKey = (dateValue) => {
+        const d = new Date(dateValue);
+        if (Number.isNaN(d.getTime())) return '';
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        return `${year}-${month}`;
+    };
+
+    const monthOptions = [...new Set([
+        getCurrentMonthKey(),
+        ...sessions
+            .map((session) => getMonthKey(session.date))
+            .filter(Boolean)
+    ])].sort();
+
+    const filteredSessions = sessions.filter((session) => {
+        if (monthFilter === 'all') return true;
+        return getMonthKey(session.date) === monthFilter;
+    });
+
+    const isPastMonth = (dateValue) => {
+        const d = new Date(dateValue);
+        if (Number.isNaN(d.getTime())) return false;
+
+        const now = new Date();
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const sessionMonthStart = new Date(d.getFullYear(), d.getMonth(), 1);
+        return sessionMonthStart < currentMonthStart;
+    };
 
     // --- Backend එකෙන් දත්ත ලබා ගැනීම ---
     const fetchSessions = async () => {
@@ -55,10 +92,17 @@ function ScheduleAndConflicts() {
             if (res.ok) {
                 Swal.fire("Success", result.message, "success");
                 fetchSessions(); // UI එක refresh කරන්න
+            } else {
+                Swal.fire("Error", result.message || "Failed to resolve conflict", "error");
             }
         } catch (error) {
             Swal.fire("Error", "Failed to resolve conflict", "error");
         }
+    };
+
+    const handleReschedule = async (sessionId) => {
+        await handleResolve(sessionId, 'reschedule');
+        setIsModalOpen(true);
     };
 
     const handleGradeSession = (sessionId) => {
@@ -86,10 +130,31 @@ function ScheduleAndConflicts() {
                     <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                         <span>📅</span> Schedule & Conflicts
                     </h2>
-                    <button className="bg-white hover:bg-blue-50 text-blue-900 px-6 py-2.5 rounded-xl font-bold transition-all transform active:scale-95 shadow-lg flex items-center gap-2"
-                        onClick={() => setIsModalOpen(true)}>
-                        <span className="text-xl">+</span> Add Session
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <select
+                            value={monthFilter}
+                            onChange={(e) => setMonthFilter(e.target.value)}
+                            className="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white font-semibold focus:outline-none focus:border-blue-300"
+                        >
+                            <option value="all" className="text-black">All Months</option>
+                            {monthOptions.map((monthKey) => {
+                                const [year, month] = monthKey.split('-').map(Number);
+                                const label = new Date(year, month - 1, 1).toLocaleDateString('en-US', {
+                                    month: 'long',
+                                    year: 'numeric'
+                                });
+
+                                return (
+                                    <option key={monthKey} value={monthKey} className="text-black">{label}</option>
+                                );
+                            })}
+                        </select>
+
+                        <button className="bg-white hover:bg-blue-50 text-blue-900 px-6 py-2.5 rounded-xl font-bold transition-all transform active:scale-95 shadow-lg flex items-center gap-2"
+                            onClick={() => setIsModalOpen(true)}>
+                            <span className="text-xl">+</span> Add Session
+                        </button>
+                    </div>
                 </div>
 
                 {/* --- Sessions List Section --- */}
@@ -104,12 +169,13 @@ function ScheduleAndConflicts() {
                     <div className="space-y-4">
                         {loading ? (
                             <p className="text-white text-center">Loading sessions...</p>
-                        ) : sessions.length === 0 ? (
+                        ) : filteredSessions.length === 0 ? (
                             <p className="text-white/50 text-center py-10">No sessions scheduled yet.</p>
                         ) : (
-                            sessions.map((session) => {
+                            filteredSessions.map((session) => {
                                 const sessionDate = new Date(session.date);
                                 const isConflict = session.status === 'Conflict';
+                                const isSessionPastMonth = isPastMonth(session.date);
 
                                 return (
                                     <div key={session._id} className={`group ${isConflict ? 'bg-red-500/10 border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]' : 'bg-white/5 border-white/10'} border p-6 rounded-[1.8rem] flex justify-between items-center transition-all hover:bg-white/10 hover:-translate-y-1`}>
@@ -137,6 +203,11 @@ function ScheduleAndConflicts() {
                                                         ⚠️ {session.conflicts?.length} Students have lectures at this time
                                                     </p>
                                                 )}
+                                                {isSessionPastMonth && (
+                                                    <p className="text-white/50 text-xs font-semibold mt-2 uppercase tracking-wider">
+                                                        Past month session - actions disabled
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         
@@ -145,15 +216,21 @@ function ScheduleAndConflicts() {
                                                 <>
                                                     <button 
                                                         onClick={() => handleResolve(session._id, 'keep')}
-                                                        className="bg-white text-red-600 px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:bg-red-50 transition-colors">
+                                                        disabled={isSessionPastMonth}
+                                                        className="bg-white text-red-600 px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white">
                                                         Manage Conflict
                                                     </button>
-                                                    <button className="text-white/40 hover:text-white/90 text-[10px] font-bold uppercase underline transition-colors">
+                                                    <button
+                                                        onClick={() => handleReschedule(session._id)}
+                                                        disabled={isSessionPastMonth}
+                                                        className="text-white/40 hover:text-white/90 text-[10px] font-bold uppercase underline transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
                                                         Reschedule
                                                     </button>
                                                 </>
                                             ) : (
-                                                <button className="bg-green-500/20 text-green-400 border border-green-500/40 px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-widest"
+                                                <button className="bg-green-500/20 text-green-400 border border-green-500/40 px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    disabled={isSessionPastMonth}
                                                     onClick={() => handleGradeSession(session._id)}>
                                                     Grade Session
                                                 </button>

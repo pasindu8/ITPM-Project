@@ -6,9 +6,9 @@ import Loader from "../components/Loader.js";
 
 
 function SendAlerts() {
-    const [setUser] = useState(null);
+    const [, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [setDashboardData] = useState(null);
+    const [, setDashboardData] = useState(null);
     const [students, setStudents] = useState([]); // ශිෂ්‍යයන් තබා ගැනීමට
     const [selectedAudience, setSelectedAudience] = useState("all"); // තෝරාගත් ශිෂ්‍යයා
 
@@ -66,7 +66,7 @@ function SendAlerts() {
                 if (res.ok) {
                     setDashboardData(result.data);
                     setUser(result.user); // Backend එකෙන් user එවන්න ඕනේ, නැත්නම් localStorage එකෙන් ගන්න
-                    setStudents(result.data.studentList || []); // Set students list from backend response
+                    setStudents(result?.data?.studentList || result?.studentList || []); // Set students list from backend response
                 } else {
                     console.error("Failed to fetch stats");
                 }

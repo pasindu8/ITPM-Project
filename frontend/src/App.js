@@ -50,6 +50,12 @@ import FollowUpTracker from "./pages/FollowUpTracker.js";
 import TreatmentLog from "./pages/TreatmentLog.js";
 import EmergencyReferrals from "./pages/EmergencyReferrals.js";
 
+import LecturerDashboard from "./pages/LecturerDashboard.js";
+import SubjectManagement from "./pages/SubjectManagement.js";
+import CourseMaterials from "./pages/CourseMaterials.js";
+import StudentMarks from "./pages/StudentMarks.js";
+import LecturerScheduleAndConflicts from "./pages/LecturerScheduleAndConflicts.js";
+
 import React, { useEffect, useState } from 'react';
 
 // Title එක වෙනස් කරන Logic එක මෙතන තියෙන්නේ
@@ -70,16 +76,23 @@ const TitleUpdater = () => {
       '/QrAttendance': 'SmartSport | Attendance',
       '/PerformanceAnalytics': 'SmartSport | Analytics',
       '/MatchHistory': 'SmartSport | Match Records',
+
+      '/DoctorDashboard': 'SmartSport | Doctor Dashboard',
+      '/Appointments': 'SmartSport | Appointments',
+      '/Injuryreports': 'SmartSport | Injury Reports',
+      '/Recoveryplans': 'SmartSport | Recovery Plans',
+
       '/LecturerDashboard': 'SmartSport | Lecturer Dashboard',
       '/SubjectManagement': 'SmartSport | Subject Management',
       '/CourseMaterials': 'SmartSport | Course Materials',
       '/StudentMarks': 'SmartSport | Student Marks',
       '/LecturerScheduleAndConflicts': 'SmartSport | Lecturer Schedule',
+
       '/MedicalProfile': 'SmartSport | Medical Profiles',
       '/MedicalClearance': 'SmartSport | Medical Clearance',
       '/FollowupTracker': 'SmartSport | Follow-Up Tracker',
       '/TreatmentLog': 'SmartSport | Treatment Log',
-      '/EmergencyReferrals': 'SmartSport | Emergency Referrals'
+      '/EmergencyReferrals': 'SmartSport | Emergency Referrals',
     };
 
     document.title = titles[location.pathname] || 'SmartSport';
@@ -140,9 +153,9 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
-  const isDashboard = location.pathname === "/Dashboard"; // ✅ CHANGED: Only Dashboard.js page
+  const isDashboard = location.pathname === "/Dashboard"; //  CHANGED: Only Dashboard.js page
 
-  const hideHeaderFooter = isHomePage || isDashboard; // ✅ CHANGED: Hide on Home and Dashboard only
+  const hideHeaderFooter = isHomePage || isDashboard; //  CHANGED: Hide on Home and Dashboard only
 
   useEffect(() => {
     const publicPaths = [
@@ -195,7 +208,7 @@ function App() {
       ) : (
         <div id="myDiv">
           <TitleUpdater />
-          {!hideHeaderFooter && <Header />} {/* ✅ CHANGED */}
+          {!hideHeaderFooter && <Header />} {/*  CHANGED */}
 
           <Routes>
             <Route path="/" element={<Home />} />
