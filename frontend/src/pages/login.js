@@ -32,18 +32,26 @@ function Login() {
       });
       return;
     } 
+    const userType = result.type || "user";
+
     localStorage.setItem("token", result.token);
     localStorage.setItem("userId", result.userId);
-    localStorage.setItem("type", result.type);
+    localStorage.setItem("type", userType);
+    if (result.studentId) {
+      localStorage.setItem("studentId", result.studentId);
+    }
+    if (result.sport) {
+      localStorage.setItem("sport", result.sport);
+    }
     event.target.reset();
 
-    if (result.type === 'doctor') {
+    if (userType === 'doctor') {
         navigate("/DoctorDashboard");
         window.location.reload();
-    } else if (result.type === 'coach') {
+    } else if (userType === 'coach') {
         navigate("/CoachDashboard");
         window.location.reload();
-    }else if (result.type === 'lecturer') {
+    }else if (userType === 'lecturer') {
         navigate("/LecturerDashboard");
         window.location.reload();
     } else {

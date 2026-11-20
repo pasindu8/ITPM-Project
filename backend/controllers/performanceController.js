@@ -3,6 +3,8 @@ const PerformanceGrade = require('../models/PerformanceGrade');
 const Train = require('../models/Train');
 const Student = require('../models/Student');
 
+const escapeRegex = (str) => String(str || '').trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const effortToAttendanceScore = {
     High: 95,
     Average: 80,
@@ -11,6 +13,9 @@ const effortToAttendanceScore = {
 
 const formatDateLabel = (dateValue) => {
     const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) {
+        return 'Unknown date';
+    }
 
     return date.toLocaleDateString('en-US', {
         month: 'short',
@@ -72,7 +77,7 @@ const toPlayerSummaries = (grades) => {
                 student,
                 history: [],
                 latestGrade: grade,
-                latestDate: grade.createdAt
+                latestDate: grade.createdAt || grade.updatedAt || new Date(0)
             });
         }
 
@@ -82,7 +87,8 @@ const toPlayerSummaries = (grades) => {
             createdAt: grade.createdAt
         });
 
-        if (new Date(grade.createdAt) > new Date(entry.latestDate)) {
+        const gradeDate = new Date(grade.createdAt || grade.updatedAt || 0);
+        if (gradeDate > new Date(entry.latestDate)) {
             entry.latestGrade = grade;
             entry.latestDate = grade.createdAt;
         }
@@ -151,8 +157,13 @@ const addGrade = asyncHandler(async (req, res) => {
         return res.status(404).json({ success: false, message: 'Student not found' });
     }
 
-    if (student.sport !== session.team) {
-        return res.status(400).json({ success: false, message: 'Student does not belong to this session team' });
+    const sessionSport = (session.team || session.sport || '').trim();
+    if (sessionSport && student.sport) {
+        const teamNorm = sessionSport.toLowerCase();
+        const sportNorm = student.sport.trim().toLowerCase();
+        if (!teamNorm.includes(sportNorm) && !sportNorm.includes(teamNorm)) {
+            return res.status(400).json({ success: false, message: 'Student does not belong to this session team' });
+        }
     }
 
     const payload = {
@@ -194,18 +205,33 @@ const getStudentsForSession = asyncHandler(async (req, res) => {
         return res.status(403).json({ success: false, message: 'Not authorized for this session' });
     }
 
-    const students = await Student.find({ sport: session.team })
-        .populate('userId', 'name')
-        .sort({ studentId: 1 });
+    const teamName = (session.team || session.sport || '').trim();
+    let students = [];
+
+    if (teamName) {
+        students = await Student.find({
+            sport: { $regex: new RegExp(escapeRegex(teamName), 'i') }
+        })
+            .populate('userId', 'name')
+            .sort({ studentId: 1 });
+    }
+
+    // Fallback: session.team හිස් නම් හෝ exact match නොවුණොත් සියලුම students ලා load කිරීම
+    if (students.length === 0) {
+        students = await Student.find({})
+            .populate('userId', 'name')
+            .sort({ studentId: 1 });
+    }
 
     const formatted = students.map((student) => ({
         _id: student._id,
         name: student.userId?.name || student.studentId,
         studentId: student.studentId,
-        group: student.group
+        group: student.group,
+        sport: student.sport
     }));
 
-    res.status(200).json({ success: true, data: formatted, team: session.team });
+    res.status(200).json({ success: true, data: formatted, team: teamName });
 });
 
 // @desc    Get player summaries based on performance grades
@@ -295,7 +321,12 @@ const getPerformanceAnalytics = asyncHandler(async (req, res) => {
     const byDate = new Map();
 
     filteredGrades.forEach((grade) => {
-        const key = new Date(grade.createdAt).toISOString().slice(0, 10);
+        const dateValue = grade.createdAt || grade.updatedAt;
+        const date = new Date(dateValue);
+        if (Number.isNaN(date.getTime())) {
+            return;
+        }
+        const key = date.toISOString().slice(0, 10);
 
         if (!byDate.has(key)) {
             byDate.set(key, {

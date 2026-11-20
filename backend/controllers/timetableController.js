@@ -1,7 +1,7 @@
 const Timetable = require('../models/Timetable');
-const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const { extractTimetableFromImage } = require('../utils/localTimetableOcr');
 
 exports.uploadTimetable = async (req, res) => {
     console.log('=== Upload Request Received ===');
@@ -18,40 +18,42 @@ exports.uploadTimetable = async (req, res) => {
             return res.status(400).json({ success: false, error: 'Student ID is required' });
         }
 
-        const pythonServiceUrl = process.env.PYTHON_SERVICE_URL || 'http://127.0.0.1:5001';
-        
-        // 1. Call Python OCR service
-        const pythonResponse = await axios.post(`${pythonServiceUrl}/process`, {
-            filePath,
-            studentInfo: { year, semester, program, group }
-        }, { timeout: 60000 });
-
-        const extractedData = pythonResponse.data;
+        // 1. Extract timetable text locally so no separate OCR service is required.
+        const extractedData = await extractTimetableFromImage(filePath, {
+            studentId,
+            year,
+            semester,
+            program,
+            group
+        });
 
         if (!extractedData || !Array.isArray(extractedData)) {
             throw new Error('No valid data received from extraction service');
         }
 
-        // Add this in backend/controllers/timetableController.js
-exports.clearTimetable = async (req, res) => {
-    try {
-        await Timetable.deleteMany({ studentId: req.params.studentId });
-        res.status(200).json({ message: "Timetable cleared successfully" });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+        if (extractedData.length === 0) {
+            throw new Error('No timetable entries could be read from this image');
+        }
 
         // 2. Save to database
         const savedEntries = [];
         for (let entry of extractedData) {
             try {
+                const normalizedType = ['Lecture', 'Practical', 'Tutorial', 'Lab'].includes(entry.type)
+                    ? entry.type
+                    : entry.type === 'Lab'
+                        ? 'Lab'
+                        : entry.type?.toLowerCase().includes('practical')
+                            ? 'Practical'
+                            : entry.type?.toLowerCase().includes('tutorial')
+                                ? 'Tutorial'
+                                : 'Lecture';
                 const newEntry = new Timetable({
                     studentId,
                     day: entry.day,
                     moduleCode: entry.moduleCode,
                     moduleName: entry.moduleName,
-                    type: entry.type,
+                    type: normalizedType,
                     time: entry.time,
                     endTime: entry.endTime || '', // Can be expanded later
                     group: entry.group || group,
@@ -75,6 +77,13 @@ exports.clearTimetable = async (req, res) => {
                 });
             }
         }, 2000);
+
+        if (savedEntries.length === 0) {
+            return res.status(422).json({
+                success: false,
+                error: 'Timetable entries were extracted, but none could be saved to MongoDB'
+            });
+        }
 
         res.status(201).json({ 
             success: true, 

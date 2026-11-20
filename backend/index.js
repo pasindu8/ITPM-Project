@@ -16,8 +16,6 @@ const performanceRoutes = require('./routes/performanceRoutes');
 const lecturerRoutes = require('./routes/lecturerRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
 
-const lecturerRoutes = require('./routes/lecturerRoutes');
-
 const timetableRoutes = require('./routes/timetableRoutes');
 const studentGlobalRoutes = require('./routes/studentGlobalRoutes');
 

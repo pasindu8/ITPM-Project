@@ -8,6 +8,15 @@ const axios = require("axios");
 const Student = require('../models/Student');
 const Coach = require('../models/Coach');
 
+const ensureUserType = async (user) => {
+    if (user.type) {
+        return;
+    }
+
+    const coach = await Coach.exists({ userId: user._id });
+    user.type = coach ? 'coach' : 'user';
+};
+
 const registerUser = asyncHandler(async (req, res) => {
     const { name, email, username, password, conpassword, phoneNumber } = req.body;
 
@@ -204,10 +213,18 @@ const login = asyncHandler(async (req, res) => {
         throw new Error('Invalid email or password');
     }
 
+    const hadType = Boolean(user.type);
+    await ensureUserType(user);
+    if (!hadType) {
+        await User.updateOne({ _id: user._id }, { $set: { type: user.type } });
+    }
+
     if (user.status !== 'active') {
         res.status(403);
         throw new Error('User account is not active');
     }
+
+    const student = await Student.findOne({ userId: user._id }).select('studentId sport').lean();
 
     const token = jwt.sign(
         { id: user._id },
@@ -219,7 +236,9 @@ const login = asyncHandler(async (req, res) => {
         message: 'Login successful',
         token,
         type: user.type,
-        userId: user._id
+        userId: user._id,
+        studentId: student?.studentId || null,
+        sport: student?.sport || null
     });
 });
 
@@ -241,6 +260,7 @@ const verifyUser = asyncHandler(async (req, res) => {
         throw new Error('Invalid verification code');
     }
 
+    await ensureUserType(user);
     user.status = 'active';
     await user.save();
 
@@ -269,6 +289,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    await ensureUserType(user);
     user.password = hashedPassword;
     user.verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     user.status = 'pending';
@@ -287,8 +308,20 @@ const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 const getProfile = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
+    const user = await User.findById(req.user.id).select('-password').lean();
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    const student = await Student.findOne({ userId: user._id }).select('studentId sport').lean();
+
+    res.json({
+        ...user,
+        studentId: student?.studentId || null,
+        sport: student?.sport || null
+    });
 });
 
 const updateProfile = asyncHandler(async (req, res) => {
@@ -351,6 +384,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     user.username = username;
     user.phoneNumber = phoneNumber;
 
+    await ensureUserType(user);
     await user.save();
 
     res.json({
@@ -414,6 +448,7 @@ const resendotp = asyncHandler(async (req, res) => {
 
     user.verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
+    await ensureUserType(user);
     await sendEmail(
         user.email,
         'Your itpm verification code has been resent',

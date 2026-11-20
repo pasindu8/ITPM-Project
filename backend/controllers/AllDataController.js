@@ -27,8 +27,13 @@ const getDashboardData = asyncHandler(async (req, res) => {
     let user = null;
     let coach = null;
     let coachSport = null;
-  
-    const coachSport = coach ? coach.sport : null;
+
+    if (userId) {
+        user = await User.findById(userId);
+        coach = await Coach.findOne({ userId });
+        coachSport = coach ? coach.sport : null;
+    }
+
     const now = new Date();
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -38,26 +43,12 @@ const getDashboardData = asyncHandler(async (req, res) => {
         Match.find(coachSport ? { sport: coachSport } : {}).sort({ date: -1 }).limit(5),// If coachSport is defined, filter by sport, otherwise get all matches
         Equipment.countDocuments(coachSport ? { sport: coachSport } : {}), // If coachSport is defined, filter by sport, otherwise count all equipment
         Alert.find({}).sort({ dateAndTime: -1 }).limit(5),
-        Train.find({ coachId: req.user.id, date: { $gte: todayStart } }).sort({ date: 1, startTime: 1 }).limit(20).lean()
+        userId
+            ? Train.find({ coachId: userId, date: { $gte: todayStart } }).sort({ date: 1, startTime: 1 }).limit(20).lean()
+            : []
     ]);
 
     const nextSession = upcomingSessions.find((session) => getSessionDateTime(session) >= now) || null;
-
-
-=======
-    // 🔥 Only fetch if user exists
-    if (userId) {
-        user = await User.findById(userId);
-        coach = await Coach.findOne({ userId });
-        coachSport = coach ? coach.sport : null;
-    }
-
-    const [studentCount, recentMatches, equipmentCount, alertDash] = await Promise.all([
-        Student.countDocuments(coachSport ? { sport: coachSport } : {}),
-        Match.find(coachSport ? { sport: coachSport } : {}).sort({ date: -1 }).limit(5),
-        Equipment.countDocuments(coachSport ? { sport: coachSport } : {}),
-        Alert.find({}).sort({ dateAndTime: -1 }).limit(5)
-    ]);
 
     res.status(200).json({
         success: true,
@@ -65,9 +56,8 @@ const getDashboardData = asyncHandler(async (req, res) => {
             students: studentCount,
             matches: recentMatches,
             equipment: equipmentCount,
-
-            name: user.name, // ලොග් වෙලා ඉන්න යූසර්ගේ නම
-            id: user._id,
+            name: user?.name || "Guest",
+            id: user?._id || null,
             alerts: alertDash,
             nextSession: nextSession
                 ? {
@@ -81,9 +71,6 @@ const getDashboardData = asyncHandler(async (req, res) => {
                     status: nextSession.status
                 }
                 : null
-            name: user?.name || "Guest",   // 🔥 safe fallback
-            id: user?._id || null,         // 🔥 safe fallback
-            alerts: alertDash
         }
     });
 });

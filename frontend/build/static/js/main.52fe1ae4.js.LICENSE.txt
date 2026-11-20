@@ -192,6 +192,16 @@
 
 /**
  * @license React
+ * react-is.production.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**
+ * @license React
  * react-jsx-runtime.production.js
  *
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -258,6 +268,17 @@
  */
 
 /**
+ * @remix-run/router v1.23.0
+ *
+ * Copyright (c) Remix Software Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE.md file in the root directory of this source tree.
+ *
+ * @license MIT
+ */
+
+/**
  * A class to parse color values
  * @author Stoyan Stefanov <sstoo@gmail.com>
  * {@link   http://www.phpied.com/rgb-color-parser-in-javascript/}
@@ -265,7 +286,18 @@
  */
 
 /**
- * react-router v7.13.0
+ * React Router DOM v6.30.1
+ *
+ * Copyright (c) Remix Software Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE.md file in the root directory of this source tree.
+ *
+ * @license MIT
+ */
+
+/**
+ * React Router v6.30.1
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -358,6 +390,15 @@
  * Contributor(s):
  *    siefkenj, ahwolf, rickygu, Midnith, saintclair, eaparango,
  *    kim3er, mfo, alnorth, Flamenco
+ */
+
+/** @license React v16.13.1
+ * react-is.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 
 /** @license React v17.0.2
